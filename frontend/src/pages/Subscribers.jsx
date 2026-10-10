@@ -51,6 +51,7 @@ export default function Subscribers({ onTriggerCycle }) {
   // Deposit Form
   const [depositData, setDepositData] = useState({
     amount: '',
+    paymentChannel: 'DIRECT_RESELLER',
     paymentMethod: 'CASH',
     transactionReference: '',
     notes: ''
@@ -110,6 +111,7 @@ export default function Subscribers({ onTriggerCycle }) {
     setSelectedSub(sub);
     setDepositData({
       amount: '',
+      paymentChannel: 'DIRECT_RESELLER',
       paymentMethod: 'CASH',
       transactionReference: '',
       notes: ''
@@ -458,6 +460,56 @@ export default function Subscribers({ onTriggerCycle }) {
             </div>
           </div>
 
+          {/* Payment Collection Channel */}
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Payment Collected Through *
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
+                depositData.paymentChannel === 'DIRECT_RESELLER'
+                  ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 shadow-sm'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentChannel"
+                    value="DIRECT_RESELLER"
+                    checked={depositData.paymentChannel === 'DIRECT_RESELLER'}
+                    onChange={() => setDepositData({ ...depositData, paymentChannel: 'DIRECT_RESELLER', paymentMethod: 'CASH' })}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="font-bold text-xs">Collected by Me</span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                  Direct Cash or MFS. Reseller collects 100% and owes Mother ISP disbursement.
+                </span>
+              </label>
+
+              <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
+                depositData.paymentChannel === 'MOTHER_ISP_PORTAL'
+                  ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 shadow-sm'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentChannel"
+                    value="MOTHER_ISP_PORTAL"
+                    checked={depositData.paymentChannel === 'MOTHER_ISP_PORTAL'}
+                    onChange={() => setDepositData({ ...depositData, paymentChannel: 'MOTHER_ISP_PORTAL', paymentMethod: 'ONLINE_PORTAL' })}
+                    className="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="font-bold text-xs">Mother ISP Portal</span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                  Customer paid Mother ISP portal. Mother ISP keeps her share and credits your balance.
+                </span>
+              </label>
+            </div>
+          </div>
+
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Deposit Amount (৳) *</label>
             <input
@@ -471,6 +523,35 @@ export default function Subscribers({ onTriggerCycle }) {
             />
           </div>
 
+          {/* Real-time Mother ISP split preview when paid via Mother ISP Portal */}
+          {depositData.paymentChannel === 'MOTHER_ISP_PORTAL' && Number(depositData.amount) > 0 && (
+            <div className="p-3 bg-indigo-50/80 dark:bg-indigo-950/40 rounded-xl border border-indigo-200 dark:border-indigo-900/60 space-y-1.5">
+              <div className="flex items-center justify-between font-semibold text-indigo-900 dark:text-indigo-200 text-xs">
+                <span>Mother ISP Portal Settlement Split</span>
+                <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-mono">
+                  Rate: {selectedSub?.effectiveMotherIspRate || 49}% / {100 - Number(selectedSub?.effectiveMotherIspRate || 49)}%
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-semibold">Mother ISP Keeps ({selectedSub?.effectiveMotherIspRate || 49}%)</span>
+                  <span className="font-extrabold text-rose-600 dark:text-rose-400 text-sm">
+                    ৳{((Number(depositData.amount) * Number(selectedSub?.effectiveMotherIspRate || 49)) / 100).toFixed(2)}
+                  </span>
+                </div>
+                <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-semibold">Credited to My Balance ({100 - Number(selectedSub?.effectiveMotherIspRate || 49)}%)</span>
+                  <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">
+                    ৳{(Number(depositData.amount) - ((Number(depositData.amount) * Number(selectedSub?.effectiveMotherIspRate || 49)) / 100)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <p className="text-[10px] text-indigo-700 dark:text-indigo-300">
+                Full ৳{depositData.amount} will credit the subscriber's wallet, and your Mother ISP balance will increase automatically.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
@@ -479,11 +560,22 @@ export default function Subscribers({ onTriggerCycle }) {
                 onChange={e => setDepositData({ ...depositData, paymentMethod: e.target.value })}
                 className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               >
-                <option value="CASH">Cash in Hand</option>
-                <option value="BKASH">bKash Personal / Merchant</option>
-                <option value="NAGAD">Nagad</option>
-                <option value="ROCKET">Rocket</option>
-                <option value="BANK_TRANSFER">Bank Wire / Transfer</option>
+                {depositData.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
+                  <>
+                    <option value="ONLINE_PORTAL">Mother ISP Portal / Gateway</option>
+                    <option value="BKASH">bKash (Mother ISP Portal)</option>
+                    <option value="NAGAD">Nagad (Mother ISP Portal)</option>
+                    <option value="BANK_TRANSFER">Bank (Mother ISP Portal)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="CASH">Cash in Hand</option>
+                    <option value="BKASH">bKash Personal / Merchant</option>
+                    <option value="NAGAD">Nagad</option>
+                    <option value="ROCKET">Rocket</option>
+                    <option value="BANK_TRANSFER">Bank Wire / Transfer</option>
+                  </>
+                )}
               </select>
             </div>
             <div>
@@ -493,7 +585,7 @@ export default function Subscribers({ onTriggerCycle }) {
                 value={depositData.transactionReference}
                 onChange={e => setDepositData({ ...depositData, transactionReference: e.target.value })}
                 className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
-                placeholder="e.g. 9J21KA991"
+                placeholder={depositData.paymentChannel === 'MOTHER_ISP_PORTAL' ? "Portal Tx ID (e.g. MISP-98421)" : "e.g. 9J21KA991"}
               />
             </div>
           </div>
@@ -505,7 +597,7 @@ export default function Subscribers({ onTriggerCycle }) {
               value={depositData.notes}
               onChange={e => setDepositData({ ...depositData, notes: e.target.value })}
               className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. Advance payment for 2 months"
+              placeholder={depositData.paymentChannel === 'MOTHER_ISP_PORTAL' ? "Customer paid on Mother ISP Portal" : "e.g. Direct cash collection"}
             />
           </div>
 
@@ -521,7 +613,7 @@ export default function Subscribers({ onTriggerCycle }) {
               type="submit"
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
             >
-              Credit Wallet
+              Record Payment
             </button>
           </div>
         </form>
@@ -584,7 +676,23 @@ export default function Subscribers({ onTriggerCycle }) {
                         ৳{tx.balanceAfter}
                       </td>
                       <td className="py-2 px-3 text-slate-500 dark:text-slate-400 text-[11px]">
-                        {tx.notes}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {tx.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                              Mother ISP Portal
+                            </span>
+                          ) : tx.transactionType === 'DEPOSIT' ? (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                              Direct ({tx.paymentMethod})
+                            </span>
+                          ) : null}
+                          <span>{tx.notes}</span>
+                        </div>
+                        {tx.paymentChannel === 'MOTHER_ISP_PORTAL' && Number(tx.resellerCreditedAmount || 0) > 0 && (
+                          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
+                            Mother ISP took: ৳{tx.motherIspRetainedAmount} | Credited to your balance: ৳{tx.resellerCreditedAmount}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))

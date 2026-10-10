@@ -214,8 +214,33 @@ public class BillingService {
                 ? req.getTransactionReference()
                 : "DEP-" + System.currentTimeMillis();
 
+        String channel = (req.getPaymentChannel() != null && req.getPaymentChannel().equalsIgnoreCase("MOTHER_ISP_PORTAL"))
+                ? "MOTHER_ISP_PORTAL"
+                : "DIRECT_RESELLER";
+
+        Reseller reseller = subscriber.getReseller();
+        BigDecimal motherIspRate = subscriber.getMotherIspRateOverride() != null
+                ? subscriber.getMotherIspRateOverride()
+                : reseller.getMotherIspDisbursementPercentage();
+
+        BigDecimal motherIspRetained = BigDecimal.ZERO;
+        BigDecimal resellerCredited = BigDecimal.ZERO;
+
+        if ("MOTHER_ISP_PORTAL".equals(channel)) {
+            // Mother ISP immediately retains her configured % and reseller gets remaining % into their Mother ISP balance
+            motherIspRetained = depositAmount.multiply(motherIspRate)
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+            resellerCredited = depositAmount.subtract(motherIspRetained);
+
+            BigDecimal currentBalance = reseller.getMotherIspResellerBalance() != null
+                    ? reseller.getMotherIspResellerBalance()
+                    : BigDecimal.ZERO;
+            reseller.setMotherIspResellerBalance(currentBalance.add(resellerCredited));
+            resellerRepository.save(reseller);
+        }
+
         SubscriberWalletTransaction tx = new SubscriberWalletTransaction(
-                subscriber.getReseller(),
+                reseller,
                 subscriber,
                 "DEPOSIT",
                 depositAmount,
@@ -223,8 +248,11 @@ public class BillingService {
                 balanceAfter,
                 req.getPaymentMethod(),
                 ref,
-                req.getNotes() != null ? req.getNotes() : "Subscriber wallet payment deposit"
+                req.getNotes() != null ? req.getNotes() : ("Subscriber payment deposit via " + ("MOTHER_ISP_PORTAL".equals(channel) ? "Mother ISP Portal" : "Direct Collection"))
         );
+        tx.setPaymentChannel(channel);
+        tx.setMotherIspRetainedAmount(motherIspRetained);
+        tx.setResellerCreditedAmount(resellerCredited);
         walletTransactionRepository.save(tx);
 
         // Reconcile open DUE invoices for this subscriber
@@ -313,6 +341,9 @@ public class BillingService {
         dto.setBalanceBefore(tx.getBalanceBefore());
         dto.setBalanceAfter(tx.getBalanceAfter());
         dto.setPaymentMethod(tx.getPaymentMethod());
+        dto.setPaymentChannel(tx.getPaymentChannel());
+        dto.setMotherIspRetainedAmount(tx.getMotherIspRetainedAmount());
+        dto.setResellerCreditedAmount(tx.getResellerCreditedAmount());
         dto.setTransactionReference(tx.getTransactionReference());
         dto.setNotes(tx.getNotes());
         dto.setTransactionDate(tx.getTransactionDate());

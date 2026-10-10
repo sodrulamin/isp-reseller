@@ -7,7 +7,8 @@ public class WalletDepositRequest {
     @NotNull
     private BigDecimal amount;
 
-    private String paymentMethod = "CASH"; // CASH, BKASH, NAGAD, ROCKET, BANK_TRANSFER
+    private String paymentMethod = "CASH"; // CASH, BKASH, NAGAD, ROCKET, BANK_TRANSFER, ONLINE_PORTAL
+    private String paymentChannel = "DIRECT_RESELLER"; // DIRECT_RESELLER or MOTHER_ISP_PORTAL
     private String transactionReference;
     private String notes;
 
@@ -18,6 +19,9 @@ public class WalletDepositRequest {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getPaymentChannel() { return paymentChannel; }
+    public void setPaymentChannel(String paymentChannel) { this.paymentChannel = paymentChannel; }
 
     public String getTransactionReference() { return transactionReference; }
     public void setTransactionReference(String transactionReference) { this.transactionReference = transactionReference; }

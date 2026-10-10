@@ -37,6 +37,10 @@ public class Reseller {
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal motherIspDisbursementPercentage = new BigDecimal("49.00");
 
+    // Reseller's accumulated credit balance held at Mother ISP (from subscriber payments via Mother ISP portal)
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal motherIspResellerBalance = BigDecimal.ZERO;
+
     @Column(nullable = false, length = 30)
     private String status = "ACTIVE";
 
@@ -92,6 +96,11 @@ public class Reseller {
     public BigDecimal getMotherIspDisbursementPercentage() { return motherIspDisbursementPercentage; }
     public void setMotherIspDisbursementPercentage(BigDecimal motherIspDisbursementPercentage) {
         this.motherIspDisbursementPercentage = motherIspDisbursementPercentage;
+    }
+
+    public BigDecimal getMotherIspResellerBalance() { return motherIspResellerBalance; }
+    public void setMotherIspResellerBalance(BigDecimal motherIspResellerBalance) {
+        this.motherIspResellerBalance = motherIspResellerBalance;
     }
 
     public String getStatus() { return status; }

@@ -55,6 +55,8 @@ public class FinancialAnalyticsService {
 
         // Revenue calculations
         BigDecimal packageCollections = walletTransactionRepository.sumDepositsCollectedByResellerAndDateRange(resellerId, monthStartDt, monthEndDt);
+        BigDecimal directCollections = walletTransactionRepository.sumDirectDepositsCollectedByResellerAndDateRange(resellerId, monthStartDt, monthEndDt);
+        BigDecimal portalCollections = walletTransactionRepository.sumPortalDepositsByResellerAndDateRange(resellerId, monthStartDt, monthEndDt);
         BigDecimal equipmentSales = equipmentRepository.sumCustomerPaidAmountByResellerAndDateRange(resellerId, monthStart, monthEnd);
         BigDecimal totalRevenue = packageCollections.add(equipmentSales);
 
@@ -106,8 +108,11 @@ public class FinancialAnalyticsService {
         dto.setResellerName(reseller.getName());
         dto.setMotherIspDisbursementPercentage(reseller.getMotherIspDisbursementPercentage());
         dto.setResellerRetentionPercentage(new BigDecimal("100.00").subtract(reseller.getMotherIspDisbursementPercentage()));
+        dto.setMotherIspResellerBalance(reseller.getMotherIspResellerBalance() != null ? reseller.getMotherIspResellerBalance() : BigDecimal.ZERO);
 
         dto.setPackageCollections(packageCollections);
+        dto.setDirectPackageCollections(directCollections);
+        dto.setPortalPackageCollections(portalCollections);
         dto.setEquipmentSalesCollections(equipmentSales);
         dto.setTotalRevenue(totalRevenue);
 

@@ -14,8 +14,13 @@ public class FinancialSummaryDto {
 
     // Revenue
     private BigDecimal packageCollections = BigDecimal.ZERO;
+    private BigDecimal directPackageCollections = BigDecimal.ZERO; // Collected directly by Reseller (Cash/MFS)
+    private BigDecimal portalPackageCollections = BigDecimal.ZERO; // Paid by customer via Mother ISP portal
     private BigDecimal equipmentSalesCollections = BigDecimal.ZERO;
     private BigDecimal totalRevenue = BigDecimal.ZERO;
+
+    // Reseller balance accumulated at Mother ISP
+    private BigDecimal motherIspResellerBalance = BigDecimal.ZERO;
 
     // Expenses
     private BigDecimal motherIspPayoutExpense = BigDecimal.ZERO;
@@ -105,6 +110,15 @@ public class FinancialSummaryDto {
 
     public BigDecimal getPackageCollections() { return packageCollections; }
     public void setPackageCollections(BigDecimal packageCollections) { this.packageCollections = packageCollections; }
+
+    public BigDecimal getDirectPackageCollections() { return directPackageCollections; }
+    public void setDirectPackageCollections(BigDecimal directPackageCollections) { this.directPackageCollections = directPackageCollections; }
+
+    public BigDecimal getPortalPackageCollections() { return portalPackageCollections; }
+    public void setPortalPackageCollections(BigDecimal portalPackageCollections) { this.portalPackageCollections = portalPackageCollections; }
+
+    public BigDecimal getMotherIspResellerBalance() { return motherIspResellerBalance; }
+    public void setMotherIspResellerBalance(BigDecimal motherIspResellerBalance) { this.motherIspResellerBalance = motherIspResellerBalance; }
 
     public BigDecimal getEquipmentSalesCollections() { return equipmentSalesCollections; }
     public void setEquipmentSalesCollections(BigDecimal equipmentSalesCollections) {

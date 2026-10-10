@@ -13,6 +13,9 @@ public class WalletTransactionDto {
     private BigDecimal balanceBefore;
     private BigDecimal balanceAfter;
     private String paymentMethod;
+    private String paymentChannel;
+    private BigDecimal motherIspRetainedAmount;
+    private BigDecimal resellerCreditedAmount;
     private String transactionReference;
     private String notes;
     private LocalDateTime transactionDate;
@@ -45,6 +48,15 @@ public class WalletTransactionDto {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getPaymentChannel() { return paymentChannel; }
+    public void setPaymentChannel(String paymentChannel) { this.paymentChannel = paymentChannel; }
+
+    public BigDecimal getMotherIspRetainedAmount() { return motherIspRetainedAmount; }
+    public void setMotherIspRetainedAmount(BigDecimal motherIspRetainedAmount) { this.motherIspRetainedAmount = motherIspRetainedAmount; }
+
+    public BigDecimal getResellerCreditedAmount() { return resellerCreditedAmount; }
+    public void setResellerCreditedAmount(BigDecimal resellerCreditedAmount) { this.resellerCreditedAmount = resellerCreditedAmount; }
 
     public String getTransactionReference() { return transactionReference; }
     public void setTransactionReference(String transactionReference) { this.transactionReference = transactionReference; }

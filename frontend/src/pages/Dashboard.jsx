@@ -124,7 +124,17 @@ export default function Dashboard() {
       </div>
 
       {/* Expense Breakdown Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <DollarSign className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">My Mother ISP Balance</p>
+            <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">৳{Number(finance?.motherIspResellerBalance || 0).toFixed(2)}</p>
+          </div>
+        </div>
+
         <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Network className="w-5 h-5" />
@@ -187,18 +197,31 @@ export default function Dashboard() {
           <div className="space-y-5">
             {/* Revenue Section */}
             <div>
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">1. Operating Revenue</h5>
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">1. Operating Revenue &amp; Collections</h5>
               <div className="space-y-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 dark:text-slate-300">Internet Package Subscription Collections</span>
-                  <span className="font-bold text-slate-900 dark:text-white">৳{Number(finance?.packageCollections || 0).toFixed(2)}</span>
+                  <div>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">Direct Reseller Package Collections</span>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 block">Collected by you in cash, bKash, direct transfer</span>
+                  </div>
+                  <span className="font-bold text-slate-900 dark:text-white">৳{Number(finance?.directPackageCollections || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 dark:text-slate-300">Subscriber Equipment Component Payments</span>
+                  <div>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">Mother ISP Portal Collections</span>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 block">Paid by subscriber directly on Mother ISP portal</span>
+                  </div>
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">৳{Number(finance?.portalPackageCollections || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">Subscriber Equipment Component Payments</span>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 block">Router &amp; ONU hardware sales</span>
+                  </div>
                   <span className="font-bold text-slate-900 dark:text-white">৳{Number(finance?.equipmentSalesCollections || 0).toFixed(2)}</span>
                 </div>
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between items-center font-extrabold text-blue-600 dark:text-blue-400">
-                  <span>Total Revenue Collected</span>
+                  <span>Total Gross Collections</span>
                   <span>৳{Number(finance?.totalRevenue || 0).toFixed(2)}</span>
                 </div>
               </div>

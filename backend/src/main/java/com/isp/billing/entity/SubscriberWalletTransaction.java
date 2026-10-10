@@ -37,6 +37,18 @@ public class SubscriberWalletTransaction {
     @Column(length = 30)
     private String paymentMethod; // CASH, BKASH, NAGAD, ROCKET, BANK_TRANSFER, SYSTEM
 
+    // DIRECT_RESELLER or MOTHER_ISP_PORTAL
+    @Column(length = 30)
+    private String paymentChannel = "DIRECT_RESELLER";
+
+    // When paid via MOTHER_ISP_PORTAL: amount kept by Mother ISP (e.g. 49%)
+    @Column(precision = 12, scale = 2)
+    private BigDecimal motherIspRetainedAmount = BigDecimal.ZERO;
+
+    // When paid via MOTHER_ISP_PORTAL: amount credited to Reseller's balance (e.g. 51%)
+    @Column(precision = 12, scale = 2)
+    private BigDecimal resellerCreditedAmount = BigDecimal.ZERO;
+
     @Column(length = 60)
     private String transactionReference;
 
@@ -58,6 +70,9 @@ public class SubscriberWalletTransaction {
         this.balanceBefore = balanceBefore;
         this.balanceAfter = balanceAfter;
         this.paymentMethod = paymentMethod;
+        this.paymentChannel = "DIRECT_RESELLER";
+        this.motherIspRetainedAmount = BigDecimal.ZERO;
+        this.resellerCreditedAmount = BigDecimal.ZERO;
         this.transactionReference = transactionReference;
         this.notes = notes;
         this.transactionDate = LocalDateTime.now();
@@ -86,6 +101,15 @@ public class SubscriberWalletTransaction {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getPaymentChannel() { return paymentChannel; }
+    public void setPaymentChannel(String paymentChannel) { this.paymentChannel = paymentChannel; }
+
+    public BigDecimal getMotherIspRetainedAmount() { return motherIspRetainedAmount; }
+    public void setMotherIspRetainedAmount(BigDecimal motherIspRetainedAmount) { this.motherIspRetainedAmount = motherIspRetainedAmount; }
+
+    public BigDecimal getResellerCreditedAmount() { return resellerCreditedAmount; }
+    public void setResellerCreditedAmount(BigDecimal resellerCreditedAmount) { this.resellerCreditedAmount = resellerCreditedAmount; }
 
     public String getTransactionReference() { return transactionReference; }
     public void setTransactionReference(String transactionReference) { this.transactionReference = transactionReference; }

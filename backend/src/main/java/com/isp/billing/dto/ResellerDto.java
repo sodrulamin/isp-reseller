@@ -13,6 +13,7 @@ public class ResellerDto {
     private String address;
     private String motherIspName;
     private BigDecimal motherIspDisbursementPercentage;
+    private BigDecimal motherIspResellerBalance;
     private String status;
     private long subscriberCount;
     private LocalDateTime createdAt;
@@ -46,6 +47,11 @@ public class ResellerDto {
     public BigDecimal getMotherIspDisbursementPercentage() { return motherIspDisbursementPercentage; }
     public void setMotherIspDisbursementPercentage(BigDecimal motherIspDisbursementPercentage) {
         this.motherIspDisbursementPercentage = motherIspDisbursementPercentage;
+    }
+
+    public BigDecimal getMotherIspResellerBalance() { return motherIspResellerBalance; }
+    public void setMotherIspResellerBalance(BigDecimal motherIspResellerBalance) {
+        this.motherIspResellerBalance = motherIspResellerBalance;
     }
 
     public String getStatus() { return status; }

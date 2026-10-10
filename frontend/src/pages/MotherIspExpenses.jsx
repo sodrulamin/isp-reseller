@@ -6,14 +6,19 @@ import { Network, DollarSign, Calendar, Search, ArrowUpRight, CheckCircle2 } fro
 export default function MotherIspExpenses() {
   const { activeWorkspaceId } = useAuth();
   const [payouts, setPayouts] = useState([]);
+  const [reseller, setReseller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  const loadPayouts = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = await apiClient.get('/billing/mother-isp-payouts');
-      setPayouts(data || []);
+      const [payoutsData, resellerData] = await Promise.all([
+        apiClient.get('/billing/mother-isp-payouts'),
+        apiClient.get('/auth/me')
+      ]);
+      setPayouts(payoutsData || []);
+      setReseller(resellerData?.reseller || null);
     } catch (err) {
       console.error(err);
     } finally {
@@ -22,10 +27,11 @@ export default function MotherIspExpenses() {
   };
 
   useEffect(() => {
-    loadPayouts();
+    loadData();
   }, [activeWorkspaceId]);
 
   const totalDisbursed = payouts.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
+  const motherIspBalance = Number(reseller?.motherIspResellerBalance || 0);
 
   const filtered = payouts.filter(p =>
     (p.subscriberName || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -38,33 +44,39 @@ export default function MotherIspExpenses() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Mother ISP Package Expenses</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Mother ISP Package Expenses &amp; Ledger</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Expense #1: Automated disbursement obligations calculated per subscriber cycle using your configured percentage.
+            Track contractual Mother ISP share obligations, portal deductions, and your accumulated balance.
           </p>
         </div>
       </div>
 
       {/* Summary KPI Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Disbursed to Mother ISP</span>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">My Mother ISP Balance</span>
+          <h3 className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">৳{motherIspBalance.toFixed(2)}</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Reseller share earned from portal payments</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Disbursement Obligations</span>
           <h3 className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-2">৳{totalDisbursed.toFixed(2)}</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Across all subscriber cycles to date</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Total Mother ISP fee for renewed cycles</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Package Cycle Disbursements</span>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Package Cycle Disbursements</span>
           <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2">{payouts.length}</h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Total recorded monthly payouts</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Total cycles processed</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Average Disbursement Rate</span>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Contractual Share Rate</span>
           <h3 className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">
-            {payouts.length > 0 ? (payouts.reduce((acc, p) => acc + Number(p.disbursementPercentage || 49), 0) / payouts.length).toFixed(1) : 49.0}%
+            {reseller?.motherIspDisbursementPercentage ? Number(reseller.motherIspDisbursementPercentage).toFixed(1) : '49.0'}%
           </h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Contractual mother ISP percentage</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Mother ISP share per cycle</p>
         </div>
       </div>
 

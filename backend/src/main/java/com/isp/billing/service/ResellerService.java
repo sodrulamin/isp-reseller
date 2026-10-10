@@ -132,6 +132,7 @@ public class ResellerService {
         dto.setAddress(r.getAddress());
         dto.setMotherIspName(r.getMotherIspName());
         dto.setMotherIspDisbursementPercentage(r.getMotherIspDisbursementPercentage());
+        dto.setMotherIspResellerBalance(r.getMotherIspResellerBalance());
         dto.setStatus(r.getStatus());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setSubscriberCount(subscriberRepository.countByResellerId(r.getId()));
