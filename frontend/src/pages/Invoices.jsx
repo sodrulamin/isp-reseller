@@ -1,0 +1,132 @@
+import React, { useState, useEffect } from 'react';
+import { apiClient } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { Receipt, Search, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+
+export default function Invoices() {
+  const { activeWorkspaceId } = useAuth();
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  const loadInvoices = async () => {
+    setLoading(true);
+    try {
+      const data = await apiClient.get('/billing/invoices');
+      setInvoices(data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInvoices();
+  }, [activeWorkspaceId]);
+
+  const filtered = invoices.filter(inv =>
+    (inv.invoiceNumber || '').toLowerCase().includes(search.toLowerCase()) ||
+    (inv.subscriberName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (inv.subscriberCode || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Subscriber Billing Invoices</h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Generated automatically when subscriber monthly billing cycles renew.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+        <Search className="w-4 h-4 text-slate-400" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by invoice number or subscriber..."
+          className="w-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold">
+              <tr>
+                <th className="py-3 px-4">Invoice #</th>
+                <th className="py-3 px-4">Subscriber</th>
+                <th className="py-3 px-4">Billing Period</th>
+                <th className="py-3 px-4">Due Date</th>
+                <th className="py-3 px-4">Total Amount</th>
+                <th className="py-3 px-4">Paid Amount</th>
+                <th className="py-3 px-4 font-bold">Due Amount</th>
+                <th className="py-3 px-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="py-8 text-center text-slate-400">Loading invoices...</td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="py-8 text-center text-slate-400">No invoices found.</td>
+                </tr>
+              ) : (
+                filtered.map(inv => (
+                  <tr key={inv.id} className="hover:bg-slate-50/70">
+                    <td className="py-3.5 px-4 font-mono font-semibold text-blue-600">
+                      {inv.invoiceNumber}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-semibold text-slate-900">
+                      {inv.subscriberName}
+                      <div className="text-[10px] text-slate-400 font-mono">{inv.subscriberCode}</div>
+                    </td>
+
+                    <td className="py-3.5 px-4 text-slate-700">
+                      {inv.billingPeriodStart} to {inv.billingPeriodEnd}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-slate-600">
+                      {inv.dueDate}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-bold text-slate-900">
+                      ৳{Number(inv.totalAmount || 0).toFixed(2)}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-emerald-600 font-semibold">
+                      ৳{Number(inv.paidAmount || 0).toFixed(2)}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-bold text-rose-600">
+                      ৳{Number(inv.dueAmount || 0).toFixed(2)}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-center">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                        inv.status === 'PAID'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : inv.status === 'PARTIAL'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      }`}>
+                        {inv.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

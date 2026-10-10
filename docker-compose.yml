@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: isp-billing-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://host.docker.internal:5624/isp_billing_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: "isp_billing_only_user"
+      SPRING_DATASOURCE_PASSWORD: "0xd_Eye]47JF"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - isp-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: isp-billing-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - isp-network
+
+networks:
+  isp-network:
+    driver: bridge
