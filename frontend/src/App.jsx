@@ -24,13 +24,13 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+    <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors overflow-hidden">
       <Navbar />
 
-      <div className="flex flex-1 w-full">
+      <div className="flex flex-1 w-full overflow-hidden">
         <Sidebar currentTab={currentTab} onSelectTab={setCurrentTab} />
 
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0">
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
           {currentTab === 'dashboard' && <Dashboard key={cycleKey} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}

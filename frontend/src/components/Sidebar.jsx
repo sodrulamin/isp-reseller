@@ -28,7 +28,7 @@ export default function Sidebar({ currentTab, onSelectTab }) {
   ];
 
   return (
-    <aside className="w-72 bg-slate-900 dark:bg-slate-950 text-slate-300 flex flex-col flex-shrink-0 min-h-[calc(100vh-4.25rem)] border-r border-transparent dark:border-slate-800/80 transition-colors">
+    <aside className="w-72 bg-slate-900 dark:bg-slate-950 text-slate-300 flex flex-col flex-shrink-0 h-full overflow-hidden border-r border-transparent dark:border-slate-800/80 transition-colors select-none">
       <div className="p-4">
         <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2.5">
           Navigation
