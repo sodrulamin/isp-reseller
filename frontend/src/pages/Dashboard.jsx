@@ -17,15 +17,11 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-export default function Dashboard() {
+export default function Dashboard({ selectedMonth = '2026-10' }) {
   const { user, isSuperAdmin, activeWorkspaceId } = useAuth();
   const [finance, setFinance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  });
 
   const loadFinancials = async () => {
     setLoading(true);
@@ -44,41 +40,16 @@ export default function Dashboard() {
     loadFinancials();
   }, [selectedMonth, activeWorkspaceId]);
 
-  const monthOptions = [
-    { value: '2026-10', label: 'October 2026' },
-    { value: '2026-09', label: 'September 2026' },
-    { value: '2026-08', label: 'August 2026' },
-    { value: '2026-07', label: 'July 2026' },
-    { value: '2026-06', label: 'June 2026' },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-            Financial &amp; Profit Monitoring
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            Real-time monthly revenue, Mother ISP disbursements, equipment, and service expenses.
-          </p>
-        </div>
-
-        {/* Month Filter */}
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Month:</span>
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="text-xs font-medium bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-800 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {monthOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          Financial &amp; Profit Monitoring
+        </h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+          Real-time monthly revenue, Mother ISP disbursements, equipment, and service expenses.
+        </p>
       </div>
 
       {error && (

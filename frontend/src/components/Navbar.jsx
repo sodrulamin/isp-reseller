@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiClient } from '../api/client';
-import { Building2, Sun, Moon } from 'lucide-react';
+import { Building2, Sun, Moon, Calendar } from 'lucide-react';
 
-export default function Navbar() {
+export default function Navbar({ selectedMonth, onMonthChange }) {
   const { user, isSuperAdmin, activeWorkspaceId, switchWorkspace } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [resellers, setResellers] = useState([]);
@@ -54,6 +54,23 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Month Selector */}
+        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1.5 rounded-xl shadow-sm">
+          <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Month:</span>
+          <select
+            value={selectedMonth}
+            onChange={(e) => onMonthChange && onMonthChange(e.target.value)}
+            className="text-xs font-bold bg-transparent text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer"
+          >
+            <option value="2026-10" className="dark:bg-slate-900">October 2026</option>
+            <option value="2026-09" className="dark:bg-slate-900">September 2026</option>
+            <option value="2026-08" className="dark:bg-slate-900">August 2026</option>
+            <option value="2026-07" className="dark:bg-slate-900">July 2026</option>
+            <option value="2026-06" className="dark:bg-slate-900">June 2026</option>
+          </select>
+        </div>
+
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleTheme}

@@ -18,6 +18,7 @@ export default function App() {
   const { user, isSuperAdmin } = useAuth();
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [cycleKey, setCycleKey] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState('2026-10');
 
   if (!user) {
     return <Login />;
@@ -25,13 +26,13 @@ export default function App() {
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors overflow-hidden">
-      <Navbar />
+      <Navbar selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
 
       <div className="flex flex-1 w-full overflow-hidden">
         <Sidebar currentTab={currentTab} onSelectTab={setCurrentTab} />
 
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
-          {currentTab === 'dashboard' && <Dashboard key={cycleKey} />}
+          {currentTab === 'dashboard' && <Dashboard key={cycleKey} selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}
           {currentTab === 'equipment' && <EquipmentExpenses key={cycleKey} />}
