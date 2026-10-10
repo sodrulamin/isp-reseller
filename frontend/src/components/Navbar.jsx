@@ -26,35 +26,30 @@ export default function Navbar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">isp-reseller</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Expenses, Revenue &amp; Profit Monitoring</p>
+            {isSuperAdmin ? (
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Workspace:</span>
+                <select
+                  value={activeWorkspaceId}
+                  onChange={(e) => switchWorkspace(e.target.value)}
+                  className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-md px-2 py-0.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Global Platform (All Workspaces)</option>
+                  {resellers.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} ({r.code.toUpperCase()}) - {r.motherIspDisbursementPercentage}% Mother ISP
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 font-semibold mt-0.5">
+                <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>{user?.resellerName || 'My Workspace'}</span>
+                <span className="text-blue-600 dark:text-blue-400 font-mono font-medium">({user?.resellerCode})</span>
+              </div>
+            )}
           </div>
-        </div>
-
-        {/* Workspace Switcher / Badge */}
-        <div className="ml-6 pl-6 border-l border-slate-200 dark:border-slate-800 flex items-center gap-2">
-          {isSuperAdmin ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Workspace:</span>
-              <select
-                value={activeWorkspaceId}
-                onChange={(e) => switchWorkspace(e.target.value)}
-                className="text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Global Platform (All Workspaces)</option>
-                {resellers.map(r => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} ({r.code.toUpperCase()}) - {r.motherIspDisbursementPercentage}% Mother ISP
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 px-3.5 py-1.5 rounded-full text-sm font-semibold border border-blue-200 dark:border-blue-900/60">
-              <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span>{user?.resellerName || 'My Workspace'}</span>
-              <span className="text-blue-500 dark:text-blue-400">({user?.resellerCode})</span>
-            </div>
-          )}
         </div>
       </div>
 
