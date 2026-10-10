@@ -88,38 +88,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Top Config Ribbon */}
-      {finance && (
-        <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-5 text-white shadow-md flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
-              <Network className="w-6 h-6 text-blue-300" />
-            </div>
-            <div>
-              <p className="text-sm text-blue-200 font-semibold">Configured Mother ISP Sharing</p>
-              <h4 className="text-xl font-extrabold">
-                {finance.motherIspDisbursementPercentage}% Mother ISP / {finance.resellerRetentionPercentage}% Reseller Retained
-              </h4>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-8 text-sm">
-            <div>
-              <p className="text-blue-200 text-xs uppercase font-medium">Active Subscribers</p>
-              <p className="text-lg font-extrabold text-white mt-0.5">{finance.activeSubscribers} / {finance.totalSubscribers}</p>
-            </div>
-            <div className="border-l border-white/20 pl-8">
-              <p className="text-blue-200 text-xs uppercase font-medium">Customer Advance Credits</p>
-              <p className="text-lg font-extrabold text-emerald-400 mt-0.5">৳{Number(finance.totalSubscriberWalletCredits || 0).toFixed(2)}</p>
-            </div>
-            <div className="border-l border-white/20 pl-8">
-              <p className="text-blue-200 text-xs uppercase font-medium">Customer Overdue / Delayed</p>
-              <p className="text-lg font-extrabold text-rose-300 mt-0.5">৳{Number(finance.totalSubscriberOutstandingDue || 0).toFixed(2)}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Primary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
