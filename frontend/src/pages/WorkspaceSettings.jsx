@@ -47,7 +47,7 @@ export default function WorkspaceSettings({ onUpdate }) {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 w-full">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Workspace &amp; ISP Settings</h2>
         <p className="text-xs text-slate-500 mt-1">

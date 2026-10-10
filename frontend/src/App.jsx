@@ -41,10 +41,10 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar onRunCycle={handleRunBillingCycle} isRunningCycle={isRunningCycle} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 w-full">
         <Sidebar currentTab={currentTab} onSelectTab={setCurrentTab} />
 
-        <main className="flex-1 p-8 overflow-y-auto max-w-7xl">
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0">
           {currentTab === 'dashboard' && <Dashboard key={cycleKey} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}
