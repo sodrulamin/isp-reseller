@@ -18,28 +18,14 @@ export default function App() {
   const { user, isSuperAdmin } = useAuth();
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [cycleKey, setCycleKey] = useState(0);
-  const [isRunningCycle, setIsRunningCycle] = useState(false);
 
   if (!user) {
     return <Login />;
   }
 
-  const handleRunBillingCycle = async () => {
-    setIsRunningCycle(true);
-    try {
-      const res = await apiClient.post('/billing/run-cycle');
-      alert(`Cycle processing complete! ${res.processedSubscribers || 0} subscriber cycle renewals evaluated.`);
-      setCycleKey(k => k + 1);
-    } catch (err) {
-      alert(`Failed to run cycle: ${err.message}`);
-    } finally {
-      setIsRunningCycle(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
-      <Navbar onRunCycle={handleRunBillingCycle} isRunningCycle={isRunningCycle} />
+      <Navbar />
 
       <div className="flex flex-1 w-full">
         <Sidebar currentTab={currentTab} onSelectTab={setCurrentTab} />

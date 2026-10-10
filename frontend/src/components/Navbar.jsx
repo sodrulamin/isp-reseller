@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiClient } from '../api/client';
-import { Building2, LogOut, RefreshCw, Sun, Moon } from 'lucide-react';
+import { Building2, LogOut, Sun, Moon } from 'lucide-react';
 
-export default function Navbar({ onRunCycle, isRunningCycle }) {
+export default function Navbar() {
   const { user, isSuperAdmin, logout, activeWorkspaceId, switchWorkspace } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [resellers, setResellers] = useState([]);
@@ -59,19 +59,6 @@ export default function Navbar({ onRunCycle, isRunningCycle }) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* On-Demand Cycle Button for active workspace */}
-        {onRunCycle && (
-          <button
-            onClick={onRunCycle}
-            disabled={isRunningCycle}
-            title="Scan & renew active subscriber billing cycles"
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl shadow-sm transition disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRunningCycle ? 'animate-spin' : ''}`} />
-            <span>Process Billing Cycle</span>
-          </button>
-        )}
-
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleTheme}
