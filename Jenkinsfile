@@ -5,8 +5,8 @@ pipeline {
         JAVA_HOME = tool name: 'Java-21', type: 'jdk'
         MAVEN_HOME = tool name: 'Maven-3.9', type: 'maven'
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
-        DOCKER_IMAGE_BACKEND = "isp-billing-backend:${BUILD_NUMBER}"
-        DOCKER_IMAGE_FRONTEND = "isp-billing-frontend:${BUILD_NUMBER}"
+        DOCKER_IMAGE_BACKEND = "isp-reseller-backend:${BUILD_NUMBER}"
+        DOCKER_IMAGE_FRONTEND = "isp-reseller-frontend:${BUILD_NUMBER}"
     }
 
     stages {

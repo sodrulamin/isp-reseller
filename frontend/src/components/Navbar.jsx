@@ -25,8 +25,8 @@ export default function Navbar({ onRunCycle, isRunningCycle }) {
             ISP
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">NetLedger SaaS</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Reseller Financial &amp; Billing System</p>
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">isp-reseller</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Expenses, Revenue &amp; Profit Monitoring</p>
           </div>
         </div>
 

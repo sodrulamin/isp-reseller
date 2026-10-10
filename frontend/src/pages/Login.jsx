@@ -31,7 +31,7 @@ export default function Login() {
           <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 items-center justify-center text-white font-black text-2xl shadow-xl shadow-blue-500/20 mb-4">
             ISP
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">ISP Reseller SaaS</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">isp-reseller</h2>
           <p className="text-sm text-slate-400 mt-1">
             Monthly Expenses, Revenue &amp; Profit Monitoring
           </p>

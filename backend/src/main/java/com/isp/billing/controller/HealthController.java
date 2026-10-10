@@ -15,7 +15,7 @@ public class HealthController {
     public ResponseEntity<?> health() {
         return ResponseEntity.ok(Map.of(
                 "status", "UP",
-                "service", "ISP Reseller Billing & Profit Monitoring SaaS",
+                "service", "isp-reseller",
                 "version", "1.0.0"
         ));
     }

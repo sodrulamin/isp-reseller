@@ -10,10 +10,10 @@
         <relativePath/>
     </parent>
     
-    <groupId>com.isp.billing</groupId>
-    <artifactId>isp-billing-backend</artifactId>
+    <groupId>com.isp.reseller</groupId>
+    <artifactId>isp-reseller-backend</artifactId>
     <version>1.0.0</version>
-    <name>isp-billing-backend</name>
+    <name>isp-reseller-backend</name>
     <description>ISP Reseller Financial &amp; Billing SaaS Application</description>
     
     <properties>

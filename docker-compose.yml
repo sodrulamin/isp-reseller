@@ -1,11 +1,10 @@
-version: '3.8'
-
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    container_name: isp-billing-only-backend
+    image: isp-reseller-backend:latest
+    container_name: isp-reseller-backend
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -21,7 +20,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: isp-billing-only-frontend
+    image: isp-reseller-frontend:latest
+    container_name: isp-reseller-frontend
     restart: unless-stopped
     ports:
       - "3000:80"

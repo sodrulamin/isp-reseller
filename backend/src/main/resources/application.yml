@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: isp-billing-backend
+    name: isp-reseller-backend
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:5624/isp_billing_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${SPRING_DATASOURCE_USERNAME:isp_billing_only_user}

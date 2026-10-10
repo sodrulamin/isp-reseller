@@ -1,4 +1,4 @@
-# ISP Reseller Billing & Profit Monitoring SaaS
+# isp-reseller — ISP Reseller Billing & Profit Monitoring SaaS
 
 A specialized Multi-Tenant SaaS platform designed for **ISP Resellers** to monitor and maximize monthly profitability by automatically tracking operating revenues, Mother ISP package disbursements, subscriber equipment deployments, physical service maintenance tickets, and subscriber wallets.
 
