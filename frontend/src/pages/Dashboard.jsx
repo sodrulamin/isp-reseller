@@ -92,29 +92,29 @@ export default function Dashboard() {
       {finance && (
         <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-5 text-white shadow-md flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
-              <Network className="w-5 h-5 text-blue-300" />
+            <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
+              <Network className="w-6 h-6 text-blue-300" />
             </div>
             <div>
-              <p className="text-xs text-blue-200 font-medium">Configured Mother ISP Sharing</p>
-              <h4 className="text-lg font-bold">
+              <p className="text-sm text-blue-200 font-semibold">Configured Mother ISP Sharing</p>
+              <h4 className="text-xl font-extrabold">
                 {finance.motherIspDisbursementPercentage}% Mother ISP / {finance.resellerRetentionPercentage}% Reseller Retained
               </h4>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-xs">
+          <div className="flex items-center gap-8 text-sm">
             <div>
-              <p className="text-blue-200">Active Subscribers</p>
-              <p className="text-base font-bold text-white">{finance.activeSubscribers} / {finance.totalSubscribers}</p>
+              <p className="text-blue-200 text-xs uppercase font-medium">Active Subscribers</p>
+              <p className="text-lg font-extrabold text-white mt-0.5">{finance.activeSubscribers} / {finance.totalSubscribers}</p>
             </div>
-            <div className="border-l border-white/20 pl-6">
-              <p className="text-blue-200">Customer Advance Credits</p>
-              <p className="text-base font-bold text-emerald-400">৳{Number(finance.totalSubscriberWalletCredits || 0).toFixed(2)}</p>
+            <div className="border-l border-white/20 pl-8">
+              <p className="text-blue-200 text-xs uppercase font-medium">Customer Advance Credits</p>
+              <p className="text-lg font-extrabold text-emerald-400 mt-0.5">৳{Number(finance.totalSubscriberWalletCredits || 0).toFixed(2)}</p>
             </div>
-            <div className="border-l border-white/20 pl-6">
-              <p className="text-blue-200">Customer Overdue / Delayed</p>
-              <p className="text-base font-bold text-rose-300">৳{Number(finance.totalSubscriberOutstandingDue || 0).toFixed(2)}</p>
+            <div className="border-l border-white/20 pl-8">
+              <p className="text-blue-200 text-xs uppercase font-medium">Customer Overdue / Delayed</p>
+              <p className="text-lg font-extrabold text-rose-300 mt-0.5">৳{Number(finance.totalSubscriberOutstandingDue || 0).toFixed(2)}</p>
             </div>
           </div>
         </div>
@@ -157,33 +157,33 @@ export default function Dashboard() {
 
       {/* Expense Breakdown Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-            <Network className="w-4 h-4" />
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+            <Network className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase">Mother ISP Packages</p>
-            <p className="text-base font-bold text-slate-900">৳{Number(finance?.motherIspPayoutExpense || 0).toFixed(2)}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mother ISP Packages</p>
+            <p className="text-xl font-extrabold text-slate-900 mt-0.5">৳{Number(finance?.motherIspPayoutExpense || 0).toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
-            <Boxes className="w-4 h-4" />
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+            <Boxes className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase">Equipment Purchases (Expense #2)</p>
-            <p className="text-base font-bold text-slate-900">৳{Number(finance?.equipmentPurchaseExpense || 0).toFixed(2)}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Equipment Purchases (Expense #2)</p>
+            <p className="text-xl font-extrabold text-slate-900 mt-0.5">৳{Number(finance?.equipmentPurchaseExpense || 0).toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
-            <Wrench className="w-4 h-4" />
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+            <Wrench className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase">Physical Servicing (Expense #3)</p>
-            <p className="text-base font-bold text-slate-900">৳{Number(finance?.physicalServiceExpense || 0).toFixed(2)}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Physical Servicing (Expense #3)</p>
+            <p className="text-xl font-extrabold text-slate-900 mt-0.5">৳{Number(finance?.physicalServiceExpense || 0).toFixed(2)}</p>
           </div>
         </div>
       </div>

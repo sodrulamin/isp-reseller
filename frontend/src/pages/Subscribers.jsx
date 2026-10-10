@@ -223,61 +223,61 @@ export default function Subscribers({ onTriggerCycle }) {
 
                   return (
                     <tr key={sub.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-900">{sub.name}</div>
-                        <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5 mt-0.5">
-                          <Tag className="w-3 h-3 text-blue-500" />
-                          <span>{sub.subscriberCode}</span>
+                      <td className="py-4 px-4">
+                        <div className="font-bold text-slate-900 text-base">{sub.name}</div>
+                        <div className="text-xs text-slate-500 font-mono flex items-center gap-2 mt-1">
+                          <Tag className="w-3.5 h-3.5 text-blue-500" />
+                          <span className="font-semibold">{sub.subscriberCode}</span>
                           <span className="text-slate-300">•</span>
                           <span>{sub.phone}</span>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="font-medium text-slate-800">{sub.packageName}</div>
-                        <div className="text-[11px] text-slate-500 font-semibold text-blue-600">
+                      <td className="py-4 px-4">
+                        <div className="font-semibold text-slate-900 text-sm">{sub.packageName}</div>
+                        <div className="text-xs font-bold text-blue-600 mt-0.5">
                           ৳{sub.packagePrice} / mo ({sub.packageSpeed} Mbps)
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="text-slate-900 font-medium">{sub.joinDate}</div>
-                        <div className="text-[11px] text-slate-500">
-                          Cycle day: <span className="font-semibold text-indigo-600">{sub.billingCycleDay}th</span> of month
+                      <td className="py-4 px-4">
+                        <div className="text-slate-900 font-semibold text-sm">{sub.joinDate}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          Cycle day: <span className="font-bold text-indigo-600">{sub.billingCycleDay}th</span> of month
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="text-slate-900 font-medium">{sub.nextBillingDate}</div>
-                        <div className="text-[10px] text-emerald-600 font-semibold">Active Cycle</div>
+                      <td className="py-4 px-4">
+                        <div className="text-slate-900 font-semibold text-sm">{sub.nextBillingDate}</div>
+                        <div className="text-xs text-emerald-600 font-bold mt-0.5">Active Cycle</div>
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-rose-600">৳{Number(sub.motherIspMonthlyPayout || 0).toFixed(2)}</div>
-                        <div className="text-[11px] text-slate-400">({sub.effectiveMotherIspRate}%)</div>
+                      <td className="py-4 px-4">
+                        <div className="font-bold text-rose-600 text-sm">৳{Number(sub.motherIspMonthlyPayout || 0).toFixed(2)}</div>
+                        <div className="text-xs text-slate-400 font-medium">({sub.effectiveMotherIspRate}%)</div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
-                        <div className={`font-bold text-sm ${
+                      <td className="py-4 px-4 text-right">
+                        <div className={`font-extrabold text-base ${
                           isAdvance ? 'text-emerald-600' : isDue ? 'text-rose-600' : 'text-slate-700'
                         }`}>
                           {balance >= 0 ? `৳${balance.toFixed(2)}` : `-৳${Math.abs(balance).toFixed(2)}`}
                         </div>
-                        <div className="text-[10px] font-semibold mt-0.5">
-                          {isAdvance && <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Advance Paid</span>}
-                          {isDue && <span className="text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">Delayed / Due</span>}
+                        <div className="text-xs font-semibold mt-1">
+                          {isAdvance && <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Advance Paid</span>}
+                          {isDue && <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">Delayed / Due</span>}
                           {balance === 0 && <span className="text-slate-500">Settled (0.00)</span>}
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-4 px-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleOpenDeposit(sub)}
                             title="Collect payment / deposit into wallet"
-                            className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-lg flex items-center gap-1 transition text-[11px]"
+                            className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm"
                           >
-                            <Wallet className="w-3.5 h-3.5" />
+                            <Wallet className="w-4 h-4" />
                             <span>Deposit</span>
                           </button>
 

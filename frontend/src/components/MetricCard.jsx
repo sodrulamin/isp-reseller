@@ -13,17 +13,17 @@ export default function MetricCard({ title, value, subtitle, icon: Icon, trend, 
   return (
     <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow transition-shadow">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{title}</p>
+        <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{title}</p>
         {Icon && (
-          <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${colorMap[color]}`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${colorMap[color]}`}>
             <Icon className="w-5 h-5" />
           </div>
         )}
       </div>
       <div className="mt-3">
-        <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
+        <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{value}</h3>
         {subtitle && (
-          <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+          <p className="text-sm text-slate-500 mt-1.5 flex items-center gap-1.5 font-medium">
             {subtitle}
           </p>
         )}
