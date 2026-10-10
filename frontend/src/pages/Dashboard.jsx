@@ -57,22 +57,22 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Financial &amp; Profit Monitoring
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
             Real-time monthly revenue, Mother ISP disbursements, equipment, and service expenses.
           </p>
         </div>
 
         {/* Month Filter */}
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-slate-500" />
-          <span className="text-xs font-semibold text-slate-600">Month:</span>
+          <Calendar className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Month:</span>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="text-xs font-medium bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-xs font-medium bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-800 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {monthOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -82,7 +82,7 @@ export default function Dashboard() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 text-xs">
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-xl flex items-center gap-3 text-rose-700 dark:text-rose-300 text-xs">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -157,44 +157,44 @@ export default function Dashboard() {
 
       {/* Expense Breakdown Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Network className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mother ISP Packages</p>
-            <p className="text-xl font-extrabold text-slate-900 mt-0.5">৳{Number(finance?.motherIspPayoutExpense || 0).toFixed(2)}</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mother ISP Packages</p>
+            <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">৳{Number(finance?.motherIspPayoutExpense || 0).toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400">
             <Boxes className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Equipment Purchases (Expense #2)</p>
-            <p className="text-xl font-extrabold text-slate-900 mt-0.5">৳{Number(finance?.equipmentPurchaseExpense || 0).toFixed(2)}</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Equipment Purchases (Expense #2)</p>
+            <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">৳{Number(finance?.equipmentPurchaseExpense || 0).toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-100 dark:border-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <Wrench className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Physical Servicing (Expense #3)</p>
-            <p className="text-xl font-extrabold text-slate-900 mt-0.5">৳{Number(finance?.physicalServiceExpense || 0).toFixed(2)}</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Physical Servicing (Expense #3)</p>
+            <p className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">৳{Number(finance?.physicalServiceExpense || 0).toFixed(2)}</p>
           </div>
         </div>
       </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
           <TrendBarChart trends={finance?.monthlyTrends || []} />
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
           <ExpenseBreakdownChart
             motherIsp={finance?.motherIspPayoutExpense || 0}
             equipment={finance?.equipmentPurchaseExpense || 0}
@@ -204,32 +204,32 @@ export default function Dashboard() {
       </div>
 
       {/* Financial Statement Ledger */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-slate-900 text-sm">Monthly Statement Breakdown</h3>
-            <p className="text-xs text-slate-500">{finance?.monthLabel || 'Current Month'}</p>
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">Monthly Statement Breakdown</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{finance?.monthLabel || 'Current Month'}</p>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full">
+          <span className="text-xs font-semibold px-3 py-1 bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-200 rounded-full border border-blue-200 dark:border-blue-900/50">
             Accounting Summary
           </span>
         </div>
 
         <div className="p-6">
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Revenue Section */}
             <div>
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">1. Operating Revenue</h5>
-              <div className="space-y-2 bg-slate-50 rounded-xl p-3 text-xs">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">1. Operating Revenue</h5>
+              <div className="space-y-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600">Internet Package Subscription Collections</span>
-                  <span className="font-semibold text-slate-900">৳{Number(finance?.packageCollections || 0).toFixed(2)}</span>
+                  <span className="text-slate-600 dark:text-slate-300">Internet Package Subscription Collections</span>
+                  <span className="font-bold text-slate-900 dark:text-white">৳{Number(finance?.packageCollections || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600">Subscriber Equipment Component Payments</span>
-                  <span className="font-semibold text-slate-900">৳{Number(finance?.equipmentSalesCollections || 0).toFixed(2)}</span>
+                  <span className="text-slate-600 dark:text-slate-300">Subscriber Equipment Component Payments</span>
+                  <span className="font-bold text-slate-900 dark:text-white">৳{Number(finance?.equipmentSalesCollections || 0).toFixed(2)}</span>
                 </div>
-                <div className="border-t border-slate-200 pt-1 flex justify-between items-center font-bold text-blue-600">
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between items-center font-extrabold text-blue-600 dark:text-blue-400">
                   <span>Total Revenue Collected</span>
                   <span>৳{Number(finance?.totalRevenue || 0).toFixed(2)}</span>
                 </div>
@@ -238,21 +238,21 @@ export default function Dashboard() {
 
             {/* Expenses Section */}
             <div>
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">2. Reseller Operating Expenses</h5>
-              <div className="space-y-2 bg-slate-50 rounded-xl p-3 text-xs">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">2. Reseller Operating Expenses</h5>
+              <div className="space-y-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600">Mother ISP Reseller Package Disbursement ({finance?.motherIspDisbursementPercentage}%)</span>
-                  <span className="font-semibold text-rose-600">- ৳{Number(finance?.motherIspPayoutExpense || 0).toFixed(2)}</span>
+                  <span className="text-slate-600 dark:text-slate-300">Mother ISP Reseller Package Disbursement ({finance?.motherIspDisbursementPercentage}%)</span>
+                  <span className="font-bold text-rose-500">- ৳{Number(finance?.motherIspPayoutExpense || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600">Equipment &amp; Hardware Purchases (Routers, ONU, Fiber Drop)</span>
-                  <span className="font-semibold text-rose-600">- ৳{Number(finance?.equipmentPurchaseExpense || 0).toFixed(2)}</span>
+                  <span className="text-slate-600 dark:text-slate-300">Equipment &amp; Hardware Purchases (Routers, ONU, Fiber Drop)</span>
+                  <span className="font-bold text-rose-500">- ৳{Number(finance?.equipmentPurchaseExpense || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600">Physical Service Operational Maintenance (Splicing, Line Repairs)</span>
-                  <span className="font-semibold text-rose-600">- ৳{Number(finance?.physicalServiceExpense || 0).toFixed(2)}</span>
+                  <span className="text-slate-600 dark:text-slate-300">Physical Service Operational Maintenance (Splicing, Line Repairs)</span>
+                  <span className="font-bold text-rose-500">- ৳{Number(finance?.physicalServiceExpense || 0).toFixed(2)}</span>
                 </div>
-                <div className="border-t border-slate-200 pt-1 flex justify-between items-center font-bold text-rose-700">
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between items-center font-extrabold text-rose-600 dark:text-rose-400">
                   <span>Total Incurred Expenses</span>
                   <span>- ৳{Number(finance?.totalExpenses || 0).toFixed(2)}</span>
                 </div>
@@ -261,15 +261,15 @@ export default function Dashboard() {
 
             {/* Profit Section */}
             <div>
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">3. Profitability &amp; Margins</h5>
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-xs space-y-2">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">3. Profitability &amp; Margins</h5>
+              <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-xl p-5 text-sm space-y-2.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-emerald-900 font-medium">Package Gross Margin (Revenue - Mother ISP Payout)</span>
-                  <span className="font-bold text-emerald-800 text-sm">৳{Number(finance?.packageGrossProfit || 0).toFixed(2)} ({Number(finance?.packageGrossMarginPercent || 0).toFixed(1)}%)</span>
+                  <span className="text-emerald-900 dark:text-emerald-200 font-semibold">Package Gross Margin (Revenue - Mother ISP Payout)</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">৳{Number(finance?.packageGrossProfit || 0).toFixed(2)} ({Number(finance?.packageGrossMarginPercent || 0).toFixed(1)}%)</span>
                 </div>
-                <div className="border-t border-emerald-200/60 pt-2 flex justify-between items-center">
-                  <span className="text-emerald-950 font-bold text-sm">Net Reseller Profit (Bottom Line)</span>
-                  <span className="font-extrabold text-emerald-800 text-lg">৳{Number(finance?.netMonthlyProfit || 0).toFixed(2)}</span>
+                <div className="border-t border-emerald-200/60 dark:border-emerald-800/60 pt-3 flex justify-between items-center">
+                  <span className="text-emerald-950 dark:text-emerald-100 font-bold text-base">Net Reseller Profit (Bottom Line)</span>
+                  <span className="font-black text-emerald-700 dark:text-emerald-300 text-2xl">৳{Number(finance?.netMonthlyProfit || 0).toFixed(2)}</span>
                 </div>
               </div>
             </div>

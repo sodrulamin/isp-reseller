@@ -118,8 +118,8 @@ export default function ServiceTickets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Physical Service Issues &amp; Maintenance</h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Physical Service Issues &amp; Maintenance</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Expense #3: Technician transportation, splicing consumables, and operational labor costs when physical faults are reported.
           </p>
         </div>
@@ -134,102 +134,102 @@ export default function ServiceTickets() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Physical Service Expenses</span>
-          <h3 className="text-2xl font-extrabold text-rose-600 mt-2">৳{totalServiceExpense.toFixed(2)}</h3>
-          <p className="text-xs text-slate-400 mt-1">Operational repair &amp; technician costs</p>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Physical Service Expenses</span>
+          <h3 className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-2">৳{totalServiceExpense.toFixed(2)}</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Operational repair &amp; technician costs</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Reported Tickets</span>
-          <h3 className="text-2xl font-extrabold text-slate-800 mt-2">{tickets.length}</h3>
-          <p className="text-xs text-slate-400 mt-1">Customer complaint visits</p>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Reported Tickets</span>
+          <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2">{tickets.length}</h3>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Customer complaint visits</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Resolved Rate</span>
-          <h3 className="text-2xl font-extrabold text-emerald-600 mt-2">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Resolved Rate</span>
+          <h3 className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">
             {tickets.length > 0 ? ((tickets.filter(t => t.status === 'RESOLVED').length / tickets.length) * 100).toFixed(0) : 100}%
           </h3>
-          <p className="text-xs text-slate-400 mt-1">{tickets.filter(t => t.status === 'RESOLVED').length} resolved issues</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{tickets.filter(t => t.status === 'RESOLVED').length} resolved issues</p>
         </div>
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <Search className="w-4 h-4 text-slate-400" />
+      <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by ticket number, subscriber, or issue type..."
-          className="w-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
+          className="w-full text-xs text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-600">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold">
+          <table className="w-full text-left text-xs text-slate-600 dark:text-slate-400">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3 px-4">Ticket</th>
                 <th className="py-3 px-4">Subscriber</th>
                 <th className="py-3 px-4">Issue Description</th>
                 <th className="py-3 px-4">Technician</th>
-                <th className="py-3 px-4 font-bold text-rose-600">Operational Cost</th>
+                <th className="py-3 px-4 font-bold text-rose-600 dark:text-rose-400">Operational Cost</th>
                 <th className="py-3 px-4">Reported Date</th>
                 <th className="py-3 px-4 text-center">Status</th>
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="py-8 text-center text-slate-400">Loading service tickets...</td>
+                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading service tickets...</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="py-8 text-center text-slate-400">No service tickets recorded yet.</td>
+                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500">No service tickets recorded yet.</td>
                 </tr>
               ) : (
                 filtered.map(t => (
-                  <tr key={t.id} className="hover:bg-slate-50/70">
-                    <td className="py-3.5 px-4 font-mono font-semibold text-slate-900">
+                  <tr key={t.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-semibold text-slate-900 dark:text-white">
                       {t.ticketNumber}
                     </td>
 
-                    <td className="py-3.5 px-4 font-semibold text-slate-900">
+                    <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                       {t.subscriberName}
-                      <div className="text-[10px] text-slate-400 font-mono">{t.subscriberCode}</div>
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{t.subscriberCode}</div>
                     </td>
 
                     <td className="py-3.5 px-4 max-w-xs">
-                      <span className="font-semibold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">
                         {t.issueType}
                       </span>
-                      <p className="text-slate-600 mt-1 line-clamp-2">{t.description}</p>
+                      <p className="text-slate-600 dark:text-slate-300 mt-1 line-clamp-2">{t.description}</p>
                     </td>
 
-                    <td className="py-3.5 px-4 font-medium text-slate-800">
-                      {t.technicianName || <span className="text-slate-400 italic">Unassigned</span>}
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200">
+                      {t.technicianName || <span className="text-slate-400 dark:text-slate-500 italic">Unassigned</span>}
                     </td>
 
-                    <td className="py-3.5 px-4 font-bold text-rose-600 text-sm">
+                    <td className="py-3.5 px-4 font-bold text-rose-600 dark:text-rose-400 text-sm">
                       ৳{Number(t.operationalCost || 0).toFixed(2)}
                     </td>
 
-                    <td className="py-3.5 px-4 text-slate-600 text-[11px] whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
                       {t.reportedDate?.replace('T', ' ').substring(0, 16)}
                     </td>
 
                     <td className="py-3.5 px-4 text-center">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                         t.status === 'RESOLVED'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                           : t.status === 'IN_PROGRESS'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                          ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                          : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                       }`}>
                         {t.status}
                       </span>
@@ -238,7 +238,7 @@ export default function ServiceTickets() {
                     <td className="py-3.5 px-4 text-center">
                       <button
                         onClick={() => handleOpenResolve(t)}
-                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 font-semibold rounded text-[11px] text-slate-700 transition"
+                        className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold rounded text-[11px] text-slate-700 dark:text-slate-300 transition"
                       >
                         Update / Cost
                       </button>
@@ -259,12 +259,12 @@ export default function ServiceTickets() {
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Subscriber *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscriber *</label>
             <select
               required
               value={formData.subscriberId}
               onChange={e => setFormData({ ...formData, subscriberId: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Subscriber</option>
               {subscribers.map(s => (
@@ -275,11 +275,11 @@ export default function ServiceTickets() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Issue Category *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Issue Category *</label>
               <select
                 value={formData.issueType}
                 onChange={e => setFormData({ ...formData, issueType: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               >
                 <option value="FIBER_CUT">Fiber Cut / Physical Joint Break</option>
                 <option value="LOS_RED_LIGHT">Red Light LOS (Loss of Signal)</option>
@@ -292,46 +292,46 @@ export default function ServiceTickets() {
               </select>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Assigned Technician</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Technician</label>
               <input
                 type="text"
                 value={formData.technicianName}
                 onChange={e => setFormData({ ...formData, technicianName: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                 placeholder="Technician name"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Problem Description *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Problem Description *</label>
             <textarea
               required
               rows="3"
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               placeholder="Describe what occurred, location of fault, etc."
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-rose-600 mb-1">Operational Cost (৳ Reseller Expense)</label>
+            <label className="block font-semibold text-rose-600 dark:text-rose-400 mb-1">Operational Cost (৳ Reseller Expense)</label>
             <input
               type="number"
               step="0.01"
               value={formData.operationalCost}
               onChange={e => setFormData({ ...formData, operationalCost: e.target.value })}
-              className="w-full border border-rose-300 bg-rose-50/30 rounded-lg px-3 py-2 text-sm font-bold text-rose-900 focus:ring-2 focus:ring-rose-500"
+              className="w-full border border-rose-300 dark:border-rose-800 bg-rose-50/30 dark:bg-rose-950/30 rounded-lg px-3 py-2 text-sm font-bold text-rose-900 dark:text-rose-200 focus:ring-2 focus:ring-rose-500"
               placeholder="e.g. 350.00 (transport, materials, splicing honorarium)"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsAddModalOpen(false)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
             >
               Cancel
             </button>
@@ -353,11 +353,11 @@ export default function ServiceTickets() {
       >
         <form onSubmit={handleResolveSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Status</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status</label>
             <select
               value={resolveData.status}
               onChange={e => setResolveData({ ...resolveData, status: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             >
               <option value="OPEN">OPEN</option>
               <option value="IN_PROGRESS">IN_PROGRESS</option>
@@ -367,33 +367,33 @@ export default function ServiceTickets() {
           </div>
 
           <div>
-            <label className="block font-semibold text-rose-600 mb-1">Operational Cost (৳ Incurred Expense)</label>
+            <label className="block font-semibold text-rose-600 dark:text-rose-400 mb-1">Operational Cost (৳ Incurred Expense)</label>
             <input
               type="number"
               step="0.01"
               value={resolveData.operationalCost}
               onChange={e => setResolveData({ ...resolveData, operationalCost: e.target.value })}
-              className="w-full border border-rose-300 bg-rose-50/30 rounded-lg px-3 py-2 text-sm font-bold text-rose-900 focus:ring-2 focus:ring-rose-500"
+              className="w-full border border-rose-300 dark:border-rose-800 bg-rose-50/30 dark:bg-rose-950/30 rounded-lg px-3 py-2 text-sm font-bold text-rose-900 dark:text-rose-200 focus:ring-2 focus:ring-rose-500"
               placeholder="Total expense to solve issue"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Resolution &amp; Maintenance Notes</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Resolution &amp; Maintenance Notes</label>
             <textarea
               rows="3"
               value={resolveData.resolutionNotes}
               onChange={e => setResolveData({ ...resolveData, resolutionNotes: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Spliced loose fiber joint at pillar box. Optical power restored to -18dBm."
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsResolveModalOpen(false)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
             >
               Cancel
             </button>

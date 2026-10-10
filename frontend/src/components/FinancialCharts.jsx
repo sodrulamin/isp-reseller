@@ -9,7 +9,6 @@ export function TrendBarChart({ trends = [] }) {
     );
   }
 
-  // Find max value for scaling
   const maxValue = Math.max(
     ...trends.map(t => Math.max(t.revenue || 0, t.totalExpense || 0, t.netProfit || 0)),
     1000
@@ -19,26 +18,26 @@ export function TrendBarChart({ trends = [] }) {
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h4 className="text-sm font-semibold text-slate-800">6-Month Financial Trend</h4>
-          <p className="text-xs text-slate-500">Revenue, Expenses and Net Profit</p>
+          <h4 className="text-base font-bold text-slate-800 dark:text-white">6-Month Financial Trend</h4>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Revenue, Expenses and Net Profit</p>
         </div>
-        <div className="flex items-center gap-4 text-xs font-medium">
+        <div className="flex items-center gap-4 text-xs font-semibold">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-blue-500"></span>
-            <span className="text-slate-600">Revenue</span>
+            <span className="w-3.5 h-3.5 rounded-sm bg-blue-500"></span>
+            <span className="text-slate-600 dark:text-slate-300">Revenue</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-rose-400"></span>
-            <span className="text-slate-600">Total Expenses</span>
+            <span className="w-3.5 h-3.5 rounded-sm bg-rose-400"></span>
+            <span className="text-slate-600 dark:text-slate-300">Total Expenses</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-emerald-500"></span>
-            <span className="text-slate-600">Net Profit</span>
+            <span className="w-3.5 h-3.5 rounded-sm bg-emerald-500"></span>
+            <span className="text-slate-600 dark:text-slate-300">Net Profit</span>
           </div>
         </div>
       </div>
 
-      <div className="h-64 flex items-end justify-between gap-3 pt-6 border-b border-slate-200 pb-2">
+      <div className="h-64 flex items-end justify-between gap-3 pt-6 border-b border-slate-200 dark:border-slate-800 pb-2">
         {trends.map((item, idx) => {
           const revHeight = Math.min(100, Math.max(4, ((item.revenue || 0) / maxValue) * 100));
           const expHeight = Math.min(100, Math.max(4, ((item.totalExpense || 0) / maxValue) * 100));
@@ -66,7 +65,7 @@ export function TrendBarChart({ trends = [] }) {
                   className="w-3.5 bg-emerald-500 rounded-t transition-all group-hover:bg-emerald-600 relative cursor-pointer"
                 />
               </div>
-              <span className="text-[11px] font-medium text-slate-500 mt-2 whitespace-nowrap">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2 whitespace-nowrap">
                 {item.month}
               </span>
             </div>
@@ -87,12 +86,12 @@ export function ExpenseBreakdownChart({ motherIsp = 0, equipment = 0, service = 
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h4 className="text-sm font-semibold text-slate-800">Monthly Expense Composition</h4>
-        <p className="text-xs text-slate-500">Distribution among mother ISP, equipment, and servicing</p>
+        <h4 className="text-base font-bold text-slate-800 dark:text-white">Monthly Expense Composition</h4>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Distribution among mother ISP, equipment, and servicing</p>
       </div>
 
       {/* Progress Bar Stack */}
-      <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
+      <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
         <div
           style={{ width: `${motherPct}%` }}
           className="bg-indigo-600 transition-all hover:opacity-90"
@@ -113,40 +112,40 @@ export function ExpenseBreakdownChart({ motherIsp = 0, equipment = 0, service = 
       <div className="mt-5 space-y-3">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-indigo-600"></span>
-            <span className="font-medium text-slate-700">Mother ISP Reseller Packages</span>
+            <span className="w-3.5 h-3.5 rounded-full bg-indigo-600"></span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Mother ISP Reseller Packages</span>
           </div>
           <div className="text-right">
-            <span className="font-bold text-slate-900">৳{Number(motherIsp).toFixed(2)}</span>
+            <span className="font-bold text-slate-900 dark:text-white">৳{Number(motherIsp).toFixed(2)}</span>
             <span className="text-slate-400 ml-1.5 font-medium">({motherPct}%)</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-            <span className="font-medium text-slate-700">Equipment &amp; Components</span>
+            <span className="w-3.5 h-3.5 rounded-full bg-amber-500"></span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Equipment &amp; Components</span>
           </div>
           <div className="text-right">
-            <span className="font-bold text-slate-900">৳{Number(equipment).toFixed(2)}</span>
+            <span className="font-bold text-slate-900 dark:text-white">৳{Number(equipment).toFixed(2)}</span>
             <span className="text-slate-400 ml-1.5 font-medium">({eqPct}%)</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-rose-500"></span>
-            <span className="font-medium text-slate-700">Physical Service Operational Costs</span>
+            <span className="w-3.5 h-3.5 rounded-full bg-rose-500"></span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Physical Service Operational Costs</span>
           </div>
           <div className="text-right">
-            <span className="font-bold text-slate-900">৳{Number(service).toFixed(2)}</span>
+            <span className="font-bold text-slate-900 dark:text-white">৳{Number(service).toFixed(2)}</span>
             <span className="text-slate-400 ml-1.5 font-medium">({svcPct}%)</span>
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
-          <span className="text-slate-700">Total Recorded Expenses</span>
-          <span className="text-rose-600 text-sm">৳{Number(total).toFixed(2)}</span>
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
+          <span className="text-slate-700 dark:text-slate-300">Total Recorded Expenses</span>
+          <span className="text-rose-500 text-sm">৳{Number(total).toFixed(2)}</span>
         </div>
       </div>
     </div>

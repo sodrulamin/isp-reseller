@@ -61,8 +61,8 @@ export default function Packages() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Internet Packages</h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Internet Packages</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Bandwidth and speed tiers offered to your subscribers in this workspace.
           </p>
         </div>
@@ -78,30 +78,30 @@ export default function Packages() {
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {loading ? (
-          <div className="col-span-3 py-12 text-center text-slate-400 text-xs">Loading packages...</div>
+          <div className="col-span-3 py-12 text-center text-slate-400 dark:text-slate-500 text-xs">Loading packages...</div>
         ) : packages.length === 0 ? (
-          <div className="col-span-3 py-12 text-center text-slate-400 text-xs">No packages configured.</div>
+          <div className="col-span-3 py-12 text-center text-slate-400 dark:text-slate-500 text-xs">No packages configured.</div>
         ) : (
           packages.map(p => (
-            <div key={p.id} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-300 transition">
+            <div key={p.id} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:border-blue-300 dark:hover:border-blue-700 transition">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                  <span className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl">
                     <Zap className="w-5 h-5" />
                   </span>
-                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                     Active
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">{p.name}</h3>
-                <div className="mt-2 text-2xl font-extrabold text-blue-600">
-                  ৳{p.monthlyPrice} <span className="text-xs font-normal text-slate-400">/ month</span>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{p.name}</h3>
+                <div className="mt-2 text-2xl font-extrabold text-blue-600 dark:text-blue-400">
+                  ৳{p.monthlyPrice} <span className="text-xs font-normal text-slate-400 dark:text-slate-500">/ month</span>
                 </div>
-                <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
                   <span>Speed:</span>
-                  <span className="px-2 py-0.5 bg-slate-100 rounded text-slate-800 font-mono">{p.speedMbps} Mbps</span>
+                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-800 dark:text-slate-200 font-mono">{p.speedMbps} Mbps</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-3 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
                   {p.description || 'Dedicated fiber optical bandwidth with low latency.'}
                 </p>
               </div>
@@ -118,59 +118,59 @@ export default function Packages() {
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Package Plan Name *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Package Plan Name *</label>
             <input
               type="text"
               required
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Turbo 50 Mbps Home"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Speed (Mbps) *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Speed (Mbps) *</label>
               <input
                 type="number"
                 required
                 value={formData.speedMbps}
                 onChange={e => setFormData({ ...formData, speedMbps: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
                 placeholder="50"
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Monthly Fee (৳) *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Monthly Fee (৳) *</label>
               <input
                 type="number"
                 step="0.01"
                 required
                 value={formData.monthlyPrice}
                 onChange={e => setFormData({ ...formData, monthlyPrice: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-bold"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-bold"
                 placeholder="1200.00"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Description</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
             <textarea
               rows="2"
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               placeholder="Package features, FUP details, etc."
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsAddModalOpen(false)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
             >
               Cancel
             </button>

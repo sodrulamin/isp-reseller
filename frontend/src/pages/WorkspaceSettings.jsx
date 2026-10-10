@@ -49,107 +49,107 @@ export default function WorkspaceSettings({ onUpdate }) {
   return (
     <div className="space-y-6 w-full">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Workspace &amp; ISP Settings</h2>
-        <p className="text-xs text-slate-500 mt-1">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Workspace &amp; ISP Settings</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Configure Mother ISP commercial terms, disbursement percentage rate, and company contact details.
         </p>
       </div>
 
       {success && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-emerald-700 text-xs font-semibold">
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-2 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
           <CheckCircle2 className="w-4 h-4" />
           <span>Workspace settings updated successfully!</span>
         </div>
       )}
 
-      <form onSubmit={handleSave} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5 text-xs">
-        <div className="border-b border-slate-100 pb-4">
-          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-600" />
+      <form onSubmit={handleSave} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-xs">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+          <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Company Profile</span>
           </h4>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Company / Reseller Name</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Company / Reseller Name</label>
             <input
               type="text"
               required
               value={workspace?.name || ''}
               onChange={e => setWorkspace({ ...workspace, name: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Workspace Code</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Workspace Code</label>
             <input
               type="text"
               disabled
               value={workspace?.code || ''}
-              className="w-full border border-slate-200 bg-slate-50 text-slate-400 font-mono rounded-lg px-3 py-2 text-xs cursor-not-allowed"
+              className="w-full border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 font-mono rounded-lg px-3 py-2 text-xs cursor-not-allowed"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Contact Person</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Contact Person</label>
             <input
               type="text"
               value={workspace?.contactPerson || ''}
               onChange={e => setWorkspace({ ...workspace, contactPerson: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Contact Phone</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Contact Phone</label>
             <input
               type="text"
               value={workspace?.phone || ''}
               onChange={e => setWorkspace({ ...workspace, phone: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-5">
-          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-3">
-            <Network className="w-4 h-4 text-indigo-600" />
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+          <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2 mb-3">
+            <Network className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Mother ISP Contract &amp; Percentage Sharing</span>
           </h4>
-          <p className="text-[11px] text-slate-500 mb-4">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-4">
             Defines the percentage disbursed to Mother ISP when a subscriber billing cycle renews.
           </p>
 
-          <div className="grid grid-cols-2 gap-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+          <div className="grid grid-cols-2 gap-4 bg-indigo-50/50 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Mother ISP Provider</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mother ISP Provider</label>
               <input
                 type="text"
                 value={workspace?.motherIspName || ''}
                 onChange={e => setWorkspace({ ...workspace, motherIspName: e.target.value })}
-                className="w-full border border-indigo-200 bg-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
-              <label className="block font-semibold text-rose-600 mb-1">Mother ISP Disbursement (%)</label>
+              <label className="block font-semibold text-rose-600 dark:text-rose-400 mb-1">Mother ISP Disbursement (%)</label>
               <input
                 type="number"
                 step="0.01"
                 required
                 value={workspace?.motherIspDisbursementPercentage || ''}
                 onChange={e => setWorkspace({ ...workspace, motherIspDisbursementPercentage: e.target.value })}
-                className="w-full border border-rose-300 bg-white rounded-lg px-3 py-2 text-sm font-bold text-rose-900 focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-rose-300 dark:border-rose-800 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-sm font-bold text-rose-900 dark:text-rose-300 focus:ring-2 focus:ring-rose-500"
               />
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                 You retain {(100 - Number(workspace?.motherIspDisbursementPercentage || 49)).toFixed(2)}% of subscriber package price.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex justify-end">
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
           <button
             type="submit"
             disabled={saving}

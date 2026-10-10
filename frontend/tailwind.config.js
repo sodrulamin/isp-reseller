@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,9 +9,9 @@ export default {
     extend: {
       fontSize: {
         '2xs': ['0.75rem', { lineHeight: '1.05rem' }],
-        'xs': ['0.875rem', { lineHeight: '1.25rem' }],     // Bumped from 12px to 14px
-        'sm': ['0.975rem', { lineHeight: '1.45rem' }],     // Bumped from 14px to 15.6px
-        'base': ['1.0625rem', { lineHeight: '1.65rem' }],  // Bumped from 16px to 17px
+        'xs': ['0.875rem', { lineHeight: '1.25rem' }],
+        'sm': ['0.975rem', { lineHeight: '1.45rem' }],
+        'base': ['1.0625rem', { lineHeight: '1.65rem' }],
         'lg': ['1.2rem', { lineHeight: '1.75rem' }],
         'xl': ['1.375rem', { lineHeight: '1.875rem' }],
         '2xl': ['1.675rem', { lineHeight: '2.15rem' }],

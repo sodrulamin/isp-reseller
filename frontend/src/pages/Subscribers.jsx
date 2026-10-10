@@ -165,8 +165,8 @@ export default function Subscribers({ onTriggerCycle }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Subscribers &amp; Wallets</h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Subscribers &amp; Wallets</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Billing cycles start on subscriber join anniversary date. Track customer advance vs delayed payments.
           </p>
         </div>
@@ -180,22 +180,22 @@ export default function Subscribers({ onTriggerCycle }) {
       </div>
 
       {/* Filter and Search */}
-      <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <Search className="w-4 h-4 text-slate-400" />
+      <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by subscriber name, phone, or subscriber ID..."
-          className="w-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
+          className="w-full text-xs text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-600">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold">
+          <table className="w-full text-left text-xs text-slate-600 dark:text-slate-400">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3 px-4">Subscriber</th>
                 <th className="py-3 px-4">Plan &amp; Speed</th>
@@ -206,14 +206,14 @@ export default function Subscribers({ onTriggerCycle }) {
                 <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-slate-400">Loading subscribers...</td>
+                  <td colSpan="7" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading subscribers...</td>
                 </tr>
               ) : filteredSubs.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-slate-400">No subscribers found.</td>
+                  <td colSpan="7" className="py-8 text-center text-slate-400 dark:text-slate-500">No subscribers found.</td>
                 </tr>
               ) : (
                 filteredSubs.map((sub) => {
@@ -222,51 +222,51 @@ export default function Subscribers({ onTriggerCycle }) {
                   const isDue = balance < 0;
 
                   return (
-                    <tr key={sub.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={sub.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="py-4 px-4">
-                        <div className="font-bold text-slate-900 text-base">{sub.name}</div>
-                        <div className="text-xs text-slate-500 font-mono flex items-center gap-2 mt-1">
+                        <div className="font-bold text-slate-900 dark:text-white text-base">{sub.name}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 font-mono flex items-center gap-2 mt-1">
                           <Tag className="w-3.5 h-3.5 text-blue-500" />
-                          <span className="font-semibold">{sub.subscriberCode}</span>
-                          <span className="text-slate-300">•</span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{sub.subscriberCode}</span>
+                          <span className="text-slate-300 dark:text-slate-600">•</span>
                           <span>{sub.phone}</span>
                         </div>
                       </td>
 
                       <td className="py-4 px-4">
-                        <div className="font-semibold text-slate-900 text-sm">{sub.packageName}</div>
-                        <div className="text-xs font-bold text-blue-600 mt-0.5">
+                        <div className="font-semibold text-slate-900 dark:text-white text-sm">{sub.packageName}</div>
+                        <div className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">
                           ৳{sub.packagePrice} / mo ({sub.packageSpeed} Mbps)
                         </div>
                       </td>
 
                       <td className="py-4 px-4">
-                        <div className="text-slate-900 font-semibold text-sm">{sub.joinDate}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">
-                          Cycle day: <span className="font-bold text-indigo-600">{sub.billingCycleDay}th</span> of month
+                        <div className="text-slate-900 dark:text-slate-200 font-semibold text-sm">{sub.joinDate}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          Cycle day: <span className="font-bold text-indigo-600 dark:text-indigo-400">{sub.billingCycleDay}th</span> of month
                         </div>
                       </td>
 
                       <td className="py-4 px-4">
-                        <div className="text-slate-900 font-semibold text-sm">{sub.nextBillingDate}</div>
-                        <div className="text-xs text-emerald-600 font-bold mt-0.5">Active Cycle</div>
+                        <div className="text-slate-900 dark:text-slate-200 font-semibold text-sm">{sub.nextBillingDate}</div>
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Active Cycle</div>
                       </td>
 
                       <td className="py-4 px-4">
-                        <div className="font-bold text-rose-600 text-sm">৳{Number(sub.motherIspMonthlyPayout || 0).toFixed(2)}</div>
-                        <div className="text-xs text-slate-400 font-medium">({sub.effectiveMotherIspRate}%)</div>
+                        <div className="font-bold text-rose-600 dark:text-rose-400 text-sm">৳{Number(sub.motherIspMonthlyPayout || 0).toFixed(2)}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">({sub.effectiveMotherIspRate}%)</div>
                       </td>
 
                       <td className="py-4 px-4 text-right">
                         <div className={`font-extrabold text-base ${
-                          isAdvance ? 'text-emerald-600' : isDue ? 'text-rose-600' : 'text-slate-700'
+                          isAdvance ? 'text-emerald-600 dark:text-emerald-400' : isDue ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'
                         }`}>
                           {balance >= 0 ? `৳${balance.toFixed(2)}` : `-৳${Math.abs(balance).toFixed(2)}`}
                         </div>
                         <div className="text-xs font-semibold mt-1">
-                          {isAdvance && <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Advance Paid</span>}
-                          {isDue && <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">Delayed / Due</span>}
-                          {balance === 0 && <span className="text-slate-500">Settled (0.00)</span>}
+                          {isAdvance && <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">Advance Paid</span>}
+                          {isDue && <span className="text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800">Delayed / Due</span>}
+                          {balance === 0 && <span className="text-slate-500 dark:text-slate-400">Settled (0.00)</span>}
                         </div>
                       </td>
 
@@ -275,7 +275,7 @@ export default function Subscribers({ onTriggerCycle }) {
                           <button
                             onClick={() => handleOpenDeposit(sub)}
                             title="Collect payment / deposit into wallet"
-                            className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm"
+                            className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm"
                           >
                             <Wallet className="w-4 h-4" />
                             <span>Deposit</span>
@@ -284,7 +284,7 @@ export default function Subscribers({ onTriggerCycle }) {
                           <button
                             onClick={() => handleForceRenew(sub.id)}
                             title="Renew monthly cycle now"
-                            className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-emerald-600 rounded-lg transition"
+                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                           </button>
@@ -292,7 +292,7 @@ export default function Subscribers({ onTriggerCycle }) {
                           <button
                             onClick={() => handleOpenLedger(sub)}
                             title="View wallet transaction history"
-                            className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-blue-600 rounded-lg transition"
+                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition"
                           >
                             <History className="w-3.5 h-3.5" />
                           </button>
@@ -317,24 +317,24 @@ export default function Subscribers({ onTriggerCycle }) {
         <form onSubmit={handleCreateSubscriber} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Subscriber Full Name *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscriber Full Name *</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g. Asif Mahmud"
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Phone Number *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number *</label>
               <input
                 type="text"
                 required
                 value={formData.phone}
                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                 placeholder="+88017..."
               />
             </div>
@@ -342,22 +342,22 @@ export default function Subscribers({ onTriggerCycle }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Email (Optional)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email (Optional)</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                 placeholder="subscriber@email.com"
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Select Internet Package *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Internet Package *</label>
               <select
                 required
                 value={formData.packageId}
                 onChange={e => setFormData({ ...formData, packageId: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select Package</option>
                 {packages.map(p => (
@@ -371,7 +371,7 @@ export default function Subscribers({ onTriggerCycle }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Join Date (Billing Cycle Start) *
               </label>
               <input
@@ -379,14 +379,14 @@ export default function Subscribers({ onTriggerCycle }) {
                 required
                 value={formData.joinDate}
                 onChange={e => setFormData({ ...formData, joinDate: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                 Billing cycle will renew every month on this date.
               </p>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Initial Advance Deposit (৳)
               </label>
               <input
@@ -394,10 +394,10 @@ export default function Subscribers({ onTriggerCycle }) {
                 step="0.01"
                 value={formData.initialDeposit}
                 onChange={e => setFormData({ ...formData, initialDeposit: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g. 1000.00"
               />
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                 Amount subscriber pays upfront into their wallet.
               </p>
             </div>
@@ -405,44 +405,44 @@ export default function Subscribers({ onTriggerCycle }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">PPPoE Username</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username</label>
               <input
                 type="text"
                 value={formData.pppoeUsername}
                 onChange={e => setFormData({ ...formData, pppoeUsername: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
                 placeholder="user_username"
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Custom Mother ISP Rate (%)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Custom Mother ISP Rate (%)</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.motherIspRateOverride}
                 onChange={e => setFormData({ ...formData, motherIspRateOverride: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                 placeholder="Leave blank for workspace default %"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Physical Address</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Physical Address</label>
             <input
               type="text"
               value={formData.address}
               onChange={e => setFormData({ ...formData, address: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               placeholder="Building, Road, Area"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsAddModalOpen(false)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              className="px-4 py-2 border border-slate-300 dark:border-slate-750 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium"
             >
               Cancel
             </button>
@@ -463,40 +463,40 @@ export default function Subscribers({ onTriggerCycle }) {
         title={`Wallet Payment Deposit: ${selectedSub?.name}`}
       >
         <form onSubmit={handleDepositSubmit} className="space-y-4 text-xs">
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
             <div className="flex justify-between">
-              <span className="text-slate-500">Current Wallet Balance:</span>
+              <span className="text-slate-500 dark:text-slate-400">Current Wallet Balance:</span>
               <span className={`font-bold ${
-                Number(selectedSub?.walletBalance || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                Number(selectedSub?.walletBalance || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
               }`}>
                 ৳{Number(selectedSub?.walletBalance || 0).toFixed(2)}
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
               Monthly Package Fee: ৳{selectedSub?.packagePrice}
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Deposit Amount (৳) *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Deposit Amount (৳) *</label>
             <input
               type="number"
               step="0.01"
               required
               value={depositData.amount}
               onChange={e => setDepositData({ ...depositData, amount: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 text-base font-bold text-slate-900"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               placeholder="0.00"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
               <select
                 value={depositData.paymentMethod}
                 onChange={e => setDepositData({ ...depositData, paymentMethod: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               >
                 <option value="CASH">Cash in Hand</option>
                 <option value="BKASH">bKash Personal / Merchant</option>
@@ -506,33 +506,33 @@ export default function Subscribers({ onTriggerCycle }) {
               </select>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Transaction Ref / TrxID</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / TrxID</label>
               <input
                 type="text"
                 value={depositData.transactionReference}
                 onChange={e => setDepositData({ ...depositData, transactionReference: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
                 placeholder="e.g. 9J21KA991"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Notes / Description</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Description</label>
             <input
               type="text"
               value={depositData.notes}
               onChange={e => setDepositData({ ...depositData, notes: e.target.value })}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Advance payment for 2 months"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsDepositModalOpen(false)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
             >
               Cancel
             </button>
@@ -554,20 +554,20 @@ export default function Subscribers({ onTriggerCycle }) {
         maxWidth="max-w-2xl"
       >
         <div className="space-y-3 text-xs">
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <div>
-              <span className="font-semibold text-slate-900">{selectedSub?.name}</span> ({selectedSub?.subscriberCode})
-              <p className="text-[11px] text-slate-500">Plan: {selectedSub?.packageName}</p>
+              <span className="font-semibold text-slate-900 dark:text-white">{selectedSub?.name}</span> ({selectedSub?.subscriberCode})
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Plan: {selectedSub?.packageName}</p>
             </div>
             <div className="text-right">
-              <span className="text-slate-500 text-[11px]">Current Balance</span>
-              <div className="font-bold text-base text-slate-900">৳{Number(selectedSub?.walletBalance || 0).toFixed(2)}</div>
+              <span className="text-slate-500 dark:text-slate-400 text-[11px]">Current Balance</span>
+              <div className="font-bold text-base text-slate-900 dark:text-white">৳{Number(selectedSub?.walletBalance || 0).toFixed(2)}</div>
             </div>
           </div>
 
-          <div className="border border-slate-200 rounded-xl overflow-hidden max-h-72 overflow-y-auto">
+          <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-72 overflow-y-auto">
             <table className="w-full text-left">
-              <thead className="bg-slate-100 text-slate-500 font-semibold text-[11px]">
+              <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold text-[11px]">
                 <tr>
                   <th className="py-2 px-3">Date</th>
                   <th className="py-2 px-3">Type</th>
@@ -576,33 +576,33 @@ export default function Subscribers({ onTriggerCycle }) {
                   <th className="py-2 px-3">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {subLedger.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="py-6 text-center text-slate-400">No transactions yet</td>
+                    <td colSpan="5" className="py-6 text-center text-slate-400 dark:text-slate-500">No transactions yet</td>
                   </tr>
                 ) : (
                   subLedger.map(tx => (
-                    <tr key={tx.id} className="hover:bg-slate-50">
-                      <td className="py-2 px-3 text-slate-500 whitespace-nowrap">
+                    <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-850">
+                      <td className="py-2 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                         {tx.transactionDate?.replace('T', ' ').substring(0, 16)}
                       </td>
                       <td className="py-2 px-3 font-semibold">
                         {tx.transactionType === 'DEPOSIT' ? (
-                          <span className="text-emerald-600">DEPOSIT</span>
+                          <span className="text-emerald-600 dark:text-emerald-400">DEPOSIT</span>
                         ) : tx.transactionType === 'MONTHLY_PACKAGE_DEDUCTION' ? (
-                          <span className="text-rose-600">FEE DEDUCTION</span>
+                          <span className="text-rose-600 dark:text-rose-400">FEE DEDUCTION</span>
                         ) : (
-                          <span className="text-amber-600">{tx.transactionType}</span>
+                          <span className="text-amber-600 dark:text-amber-400">{tx.transactionType}</span>
                         )}
                       </td>
-                      <td className="py-2 px-3 font-bold">
+                      <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-200">
                         {tx.transactionType === 'DEPOSIT' ? `+৳${tx.amount}` : `-৳${tx.amount}`}
                       </td>
-                      <td className="py-2 px-3 font-medium text-slate-800">
+                      <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-300">
                         ৳{tx.balanceAfter}
                       </td>
-                      <td className="py-2 px-3 text-slate-500 text-[11px]">
+                      <td className="py-2 px-3 text-slate-500 dark:text-slate-400 text-[11px]">
                         {tx.notes}
                       </td>
                     </tr>
