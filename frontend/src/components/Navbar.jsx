@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiClient } from '../api/client';
-import { Building2, LogOut, Sun, Moon } from 'lucide-react';
+import { Building2, Sun, Moon } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, isSuperAdmin, logout, activeWorkspaceId, switchWorkspace } = useAuth();
+  const { user, isSuperAdmin, activeWorkspaceId, switchWorkspace } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [resellers, setResellers] = useState([]);
 
@@ -67,22 +67,6 @@ export default function Navbar() {
         >
           {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
         </button>
-
-        <div className="flex items-center gap-3.5 pl-3 border-l border-slate-200 dark:border-slate-800">
-          <div className="text-right">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">{user?.fullName || user?.username}</p>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              {isSuperAdmin ? 'Super Administrator' : 'Reseller Admin'}
-            </p>
-          </div>
-          <button
-            onClick={logout}
-            title="Log out"
-            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
-        </div>
       </div>
     </header>
   );

@@ -9,11 +9,12 @@ import {
   Package,
   Receipt,
   Settings,
-  Building2
+  Building2,
+  LogOut
 } from 'lucide-react';
 
 export default function Sidebar({ currentTab, onSelectTab }) {
-  const { isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin, logout } = useAuth();
 
   const menuItems = [
     { id: 'dashboard', label: 'Financial Dashboard', icon: LayoutDashboard, role: 'ALL' },
@@ -56,6 +57,27 @@ export default function Sidebar({ currentTab, onSelectTab }) {
             );
           })}
         </nav>
+      </div>
+
+      {/* User Profile & Logout Section */}
+      <div className="mt-auto p-4 border-t border-slate-800 dark:border-slate-800/80 bg-slate-900/90 dark:bg-slate-950/90">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-white truncate leading-tight">
+              {user?.fullName || user?.username}
+            </p>
+            <p className="text-xs font-medium text-slate-400 truncate mt-0.5">
+              {isSuperAdmin ? 'Super Administrator' : 'Reseller Admin'}
+            </p>
+          </div>
+          <button
+            onClick={logout}
+            title="Log out"
+            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 rounded-xl transition flex-shrink-0"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </aside>
   );
