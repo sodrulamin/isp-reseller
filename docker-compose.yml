@@ -24,7 +24,7 @@ services:
     container_name: isp-reseller-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3203:80"
     depends_on:
       - backend
     networks:

@@ -65,7 +65,7 @@ $$\text{Net Monthly Reseller Profit} = \text{Total Operating Revenue} - (\text{M
 
 ### 1. Backend (Spring Boot 4.1.1)
 ```powershell
-cd D:\Codes\isp-billing-only\backend
+cd D:\Codes\isp-reseller\backend
 mvn spring-boot:run
 ```
 *Backend runs on `http://localhost:8080`*
@@ -73,7 +73,7 @@ mvn spring-boot:run
 
 ### 2. Frontend (React + Vite)
 ```powershell
-cd D:\Codes\isp-billing-only\frontend
+cd D:\Codes\isp-reseller\frontend
 npm install
 npm run dev
 ```
@@ -83,10 +83,10 @@ npm run dev
 
 ## 🐳 Running with Docker Compose
 ```bash
-cd D:\Codes\isp-billing-only
+cd D:\Codes\isp-reseller
 docker compose up -d --build
 ```
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:3203`
 - Backend: `http://localhost:8080`
 
 ---
