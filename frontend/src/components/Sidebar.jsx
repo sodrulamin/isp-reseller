@@ -57,15 +57,6 @@ export default function Sidebar({ currentTab, onSelectTab }) {
           })}
         </nav>
       </div>
-
-      <div className="mt-auto p-4 border-t border-slate-800">
-        <div className="bg-slate-800/80 rounded-xl p-3.5 text-xs border border-slate-700/50">
-          <p className="font-semibold text-white text-sm">Expense &amp; Profit Engine</p>
-          <p className="text-slate-400 text-xs mt-1 leading-relaxed">
-            Revenue minus Mother ISP payout, equipment, and service maintenance.
-          </p>
-        </div>
-      </div>
     </aside>
   );
 }
