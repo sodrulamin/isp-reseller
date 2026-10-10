@@ -143,17 +143,6 @@ export default function Subscribers({ onTriggerCycle }) {
     }
   };
 
-  const handleForceRenew = async (subId) => {
-    if (!window.confirm("Renew billing cycle for this subscriber now? This will deduct the package fee and record the Mother ISP disbursement payout.")) return;
-    try {
-      await apiClient.post(`/billing/subscribers/${subId}/renew`);
-      loadData();
-      if (onTriggerCycle) onTriggerCycle();
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
   const filteredSubs = subscribers.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
     s.phone.includes(search) ||
@@ -279,14 +268,6 @@ export default function Subscribers({ onTriggerCycle }) {
                           >
                             <Wallet className="w-4 h-4" />
                             <span>Deposit</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleForceRenew(sub.id)}
-                            title="Renew monthly cycle now"
-                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition"
-                          >
-                            <RefreshCw className="w-3.5 h-3.5" />
                           </button>
 
                           <button
