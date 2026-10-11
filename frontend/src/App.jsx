@@ -47,7 +47,7 @@ export default function App() {
         />
 
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
-          {currentTab === 'dashboard' && <Dashboard key={cycleKey} />}
+          {currentTab === 'dashboard' && <Dashboard key={cycleKey} onNavigate={setCurrentTab} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}
           {currentTab === 'equipment' && <EquipmentExpenses key={cycleKey} />}
