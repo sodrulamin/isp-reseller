@@ -159,18 +159,17 @@ export default function Dashboard({ onNavigate }) {
       {/* Hero KPI Cards: 4 Flagship Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Net Reseller Profit */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-700 text-white rounded-2xl p-5 shadow-md shadow-emerald-500/15">
-          <div className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 rounded-full bg-white/10 blur-xl pointer-events-none" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-100">Net Reseller Profit</span>
-            <div className="p-1.5 rounded-lg bg-white/15 backdrop-blur-md">
-              <TrendingUp className="w-4 h-4 text-white" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Net Reseller Profit</span>
+            <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
+              <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-extrabold tracking-tight">৳{netProfit.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center gap-2 text-xs text-emerald-100 font-medium">
-              <span className="px-1.5 py-0.5 rounded bg-white/20 font-semibold">{netMargin.toFixed(1)}% Net Margin</span>
+            <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">৳{netProfit.toFixed(2)}</div>
+            <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+              <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-semibold">{netMargin.toFixed(1)}% Net Margin</span>
               <span>After all expenses</span>
             </div>
           </div>
