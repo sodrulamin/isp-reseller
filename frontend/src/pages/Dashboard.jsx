@@ -158,10 +158,64 @@ export default function Dashboard({ onNavigate }) {
 
       {/* Hero KPI Cards: 4 Flagship Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {/* Net Reseller Profit */}
+        {/* 1. Total Subscriber */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Net Reseller Profit</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Subscribers</span>
+            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              {totalSubscribers}
+            </div>
+            <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
+              <span>Active: <strong className="text-emerald-600 dark:text-emerald-400">{activeSubscribers}</strong></span>
+              <span>•</span>
+              <span>Inactive: <strong className="text-rose-500">{totalSubscribers - activeSubscribers}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Collected by mother ISP. (Customer paid themselves) */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Mother ISP Collections</span>
+            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50">
+              <Network className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight">৳{portalRev.toFixed(2)}</div>
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-normal">
+              <span className="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold text-[10px]">Portal</span>
+              <span>Customer paid themselves</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Collected by me. Manually. */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Collected by Me</span>
+            <div className="p-2 rounded-lg bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-900/50">
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">৳{directRev.toFixed(2)}</div>
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-normal">
+              <span className="px-1.5 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-semibold text-[10px]">Manual</span>
+              <span>Cash in Hand &amp; direct MFS</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Total profit */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Profit</span>
             <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
               <TrendingUp className="w-4 h-4" />
             </div>
@@ -171,57 +225,6 @@ export default function Dashboard({ onNavigate }) {
             <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-semibold">{netMargin.toFixed(1)}% Net Margin</span>
               <span>After all expenses</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Operating Collections */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Gross Collections</span>
-            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
-              <DollarSign className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">৳{totalRev.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <span>Direct: <strong className="text-slate-800 dark:text-slate-200">৳{directRev.toFixed(0)}</strong></span>
-              <span>•</span>
-              <span>Portal: <strong className="text-indigo-600 dark:text-indigo-400">৳{portalRev.toFixed(0)}</strong></span>
-            </div>
-          </div>
-        </div>
-
-        {/* My Balance at Mother ISP */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">My Mother ISP Balance</span>
-            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50">
-              <Network className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight">৳{motherIspBalance.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-normal">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Accumulated credit held at Mother ISP</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Incurred Expenses */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Expenses</span>
-            <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50">
-              <Receipt className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight">৳{totalExp.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-normal">
-              <span>ISP share: ৳{motherIspExp.toFixed(0)} ({motherIspPct}%)</span>
             </div>
           </div>
         </div>
