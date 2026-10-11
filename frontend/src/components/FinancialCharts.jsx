@@ -45,24 +45,24 @@ export function TrendBarChart({ trends = [] }) {
 
           return (
             <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
-              <div className="w-full flex items-end justify-center gap-1.5 h-full">
+              <div className="w-full flex items-end justify-center gap-2 sm:gap-2.5 h-full">
                 {/* Revenue Bar */}
                 <div
                   style={{ height: `${revHeight}%` }}
                   title={`Revenue: ৳${item.revenue?.toFixed(2)}`}
-                  className="w-3.5 bg-blue-500 rounded-t transition-all group-hover:bg-blue-600 relative cursor-pointer"
+                  className="w-5 sm:w-6 bg-blue-500 rounded-t-md transition-all group-hover:bg-blue-600 relative cursor-pointer shadow-sm"
                 />
                 {/* Expense Bar */}
                 <div
                   style={{ height: `${expHeight}%` }}
                   title={`Expenses: ৳${item.totalExpense?.toFixed(2)}`}
-                  className="w-3.5 bg-rose-400 rounded-t transition-all group-hover:bg-rose-500 relative cursor-pointer"
+                  className="w-5 sm:w-6 bg-rose-400 rounded-t-md transition-all group-hover:bg-rose-500 relative cursor-pointer shadow-sm"
                 />
                 {/* Profit Bar */}
                 <div
                   style={{ height: `${profitHeight}%` }}
                   title={`Profit: ৳${item.netProfit?.toFixed(2)}`}
-                  className="w-3.5 bg-emerald-500 rounded-t transition-all group-hover:bg-emerald-600 relative cursor-pointer"
+                  className="w-5 sm:w-6 bg-emerald-500 rounded-t-md transition-all group-hover:bg-emerald-600 relative cursor-pointer shadow-sm"
                 />
               </div>
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2 whitespace-nowrap">
