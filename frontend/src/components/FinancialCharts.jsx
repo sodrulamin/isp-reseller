@@ -14,6 +14,14 @@ export function TrendBarChart({ trends = [] }) {
     1000
   );
 
+  const formatVal = (num) => {
+    if (!num || num === 0) return '0';
+    if (Math.abs(num) >= 1000) {
+      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return Math.round(num).toString();
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
@@ -37,33 +45,50 @@ export function TrendBarChart({ trends = [] }) {
         </div>
       </div>
 
-      <div className="h-64 flex items-end justify-between gap-3 pt-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="h-72 flex items-end justify-between gap-3 pt-8 border-b border-slate-200 dark:border-slate-800 pb-2">
         {trends.map((item, idx) => {
-          const revHeight = Math.min(100, Math.max(4, ((item.revenue || 0) / maxValue) * 100));
-          const expHeight = Math.min(100, Math.max(4, ((item.totalExpense || 0) / maxValue) * 100));
-          const profitHeight = Math.min(100, Math.max(4, ((Math.max(0, item.netProfit || 0)) / maxValue) * 100));
+          const revHeight = Math.min(100, Math.max(6, ((item.revenue || 0) / maxValue) * 100));
+          const expHeight = Math.min(100, Math.max(6, ((item.totalExpense || 0) / maxValue) * 100));
+          const profitHeight = Math.min(100, Math.max(6, ((Math.max(0, item.netProfit || 0)) / maxValue) * 100));
 
           return (
             <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
               <div className="w-full flex items-end justify-center gap-2 sm:gap-2.5 h-full">
                 {/* Revenue Bar */}
-                <div
-                  style={{ height: `${revHeight}%` }}
-                  title={`Revenue: ৳${item.revenue?.toFixed(2)}`}
-                  className="w-5 sm:w-6 bg-blue-500 rounded-t-md transition-all group-hover:bg-blue-600 relative cursor-pointer shadow-sm"
-                />
+                <div className="flex flex-col items-center h-full justify-end">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-blue-600 dark:text-blue-400 mb-1 leading-none select-none">
+                    ৳{formatVal(item.revenue)}
+                  </span>
+                  <div
+                    style={{ height: `${revHeight}%` }}
+                    title={`Revenue: ৳${Number(item.revenue || 0).toFixed(2)}`}
+                    className="w-5 sm:w-6 bg-blue-500 rounded-t-md transition-all group-hover:bg-blue-600 relative cursor-pointer shadow-sm"
+                  />
+                </div>
+
                 {/* Expense Bar */}
-                <div
-                  style={{ height: `${expHeight}%` }}
-                  title={`Expenses: ৳${item.totalExpense?.toFixed(2)}`}
-                  className="w-5 sm:w-6 bg-rose-400 rounded-t-md transition-all group-hover:bg-rose-500 relative cursor-pointer shadow-sm"
-                />
+                <div className="flex flex-col items-center h-full justify-end">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-rose-500 dark:text-rose-400 mb-1 leading-none select-none">
+                    ৳{formatVal(item.totalExpense)}
+                  </span>
+                  <div
+                    style={{ height: `${expHeight}%` }}
+                    title={`Expenses: ৳${Number(item.totalExpense || 0).toFixed(2)}`}
+                    className="w-5 sm:w-6 bg-rose-400 rounded-t-md transition-all group-hover:bg-rose-500 relative cursor-pointer shadow-sm"
+                  />
+                </div>
+
                 {/* Profit Bar */}
-                <div
-                  style={{ height: `${profitHeight}%` }}
-                  title={`Profit: ৳${item.netProfit?.toFixed(2)}`}
-                  className="w-5 sm:w-6 bg-emerald-500 rounded-t-md transition-all group-hover:bg-emerald-600 relative cursor-pointer shadow-sm"
-                />
+                <div className="flex flex-col items-center h-full justify-end">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 leading-none select-none">
+                    ৳{formatVal(item.netProfit)}
+                  </span>
+                  <div
+                    style={{ height: `${profitHeight}%` }}
+                    title={`Profit: ৳${Number(item.netProfit || 0).toFixed(2)}`}
+                    className="w-5 sm:w-6 bg-emerald-500 rounded-t-md transition-all group-hover:bg-emerald-600 relative cursor-pointer shadow-sm"
+                  />
+                </div>
               </div>
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2 whitespace-nowrap">
                 {item.month}
