@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiClient } from '../api/client';
-import { Building2, Sun, Moon } from 'lucide-react';
+import { Building2, Sun, Moon, Menu } from 'lucide-react';
 
-export default function Navbar() {
+export default function Navbar({ onToggleSidebar, isSidebarCollapsed }) {
   const { user, isSuperAdmin, activeWorkspaceId, switchWorkspace } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [resellers, setResellers] = useState([]);
@@ -19,7 +19,16 @@ export default function Navbar() {
 
   return (
     <header className="min-h-[4.25rem] py-2.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between sticky top-0 z-20 transition-colors">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Minimize sidebar"}
+            className="p-2 -ml-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-sm">
             ISP

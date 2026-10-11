@@ -18,6 +18,17 @@ export default function App() {
   const { user, isSuperAdmin } = useAuth();
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [cycleKey, setCycleKey] = useState(0);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('isp_sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('isp_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   if (!user) {
     return <Login />;
@@ -25,10 +36,15 @@ export default function App() {
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors overflow-hidden">
-      <Navbar />
+      <Navbar onToggleSidebar={toggleSidebar} isSidebarCollapsed={isSidebarCollapsed} />
 
       <div className="flex flex-1 w-full overflow-hidden">
-        <Sidebar currentTab={currentTab} onSelectTab={setCurrentTab} />
+        <Sidebar
+          currentTab={currentTab}
+          onSelectTab={setCurrentTab}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+        />
 
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
           {currentTab === 'dashboard' && <Dashboard key={cycleKey} />}
