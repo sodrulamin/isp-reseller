@@ -19,6 +19,10 @@ export default {
         '4xl': ['2.625rem', { lineHeight: '3rem' }],
       },
       colors: {
+        slate: {
+          750: '#293548',
+          850: '#151e2e',
+        },
         brand: {
           50: '#eff6ff',
           100: '#dbeafe',
