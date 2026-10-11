@@ -53,40 +53,40 @@ export function TrendBarChart({ trends = [] }) {
 
           return (
             <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
-              <div className="w-full flex items-end justify-center gap-2 sm:gap-2.5 h-full">
+              <div className="w-full flex items-end justify-center gap-2.5 sm:gap-3.5 h-full">
                 {/* Revenue Bar */}
                 <div className="flex flex-col items-center h-full justify-end">
-                  <span className="text-[10px] sm:text-[11px] font-bold text-blue-600 dark:text-blue-400 mb-1 leading-none select-none">
+                  <span className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 mb-1 leading-none select-none">
                     ৳{formatVal(item.revenue)}
                   </span>
                   <div
                     style={{ height: `${revHeight}%` }}
                     title={`Revenue: ৳${Number(item.revenue || 0).toFixed(2)}`}
-                    className="w-5 sm:w-6 bg-blue-500 rounded-t-md transition-all group-hover:bg-blue-600 relative cursor-pointer shadow-sm"
+                    className="w-7 sm:w-9 bg-blue-500 rounded-t-md transition-all group-hover:bg-blue-600 relative cursor-pointer shadow-sm"
                   />
                 </div>
 
                 {/* Expense Bar */}
                 <div className="flex flex-col items-center h-full justify-end">
-                  <span className="text-[10px] sm:text-[11px] font-bold text-rose-500 dark:text-rose-400 mb-1 leading-none select-none">
+                  <span className="text-[11px] sm:text-xs font-bold text-rose-500 dark:text-rose-400 mb-1 leading-none select-none">
                     ৳{formatVal(item.totalExpense)}
                   </span>
                   <div
                     style={{ height: `${expHeight}%` }}
                     title={`Expenses: ৳${Number(item.totalExpense || 0).toFixed(2)}`}
-                    className="w-5 sm:w-6 bg-rose-400 rounded-t-md transition-all group-hover:bg-rose-500 relative cursor-pointer shadow-sm"
+                    className="w-7 sm:w-9 bg-rose-400 rounded-t-md transition-all group-hover:bg-rose-500 relative cursor-pointer shadow-sm"
                   />
                 </div>
 
                 {/* Profit Bar */}
                 <div className="flex flex-col items-center h-full justify-end">
-                  <span className="text-[10px] sm:text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 leading-none select-none">
+                  <span className="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1 leading-none select-none">
                     ৳{formatVal(item.netProfit)}
                   </span>
                   <div
                     style={{ height: `${profitHeight}%` }}
                     title={`Profit: ৳${Number(item.netProfit || 0).toFixed(2)}`}
-                    className="w-5 sm:w-6 bg-emerald-500 rounded-t-md transition-all group-hover:bg-emerald-600 relative cursor-pointer shadow-sm"
+                    className="w-7 sm:w-9 bg-emerald-500 rounded-t-md transition-all group-hover:bg-emerald-600 relative cursor-pointer shadow-sm"
                   />
                 </div>
               </div>
