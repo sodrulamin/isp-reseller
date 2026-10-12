@@ -58,6 +58,10 @@ public class SubscriberService {
             throw new IllegalArgumentException("Package does not belong to this workspace");
         }
 
+        if (req.getPppoeUsername() == null || req.getPppoeUsername().isBlank()) {
+            throw new IllegalArgumentException("PPPoE username is mandatory");
+        }
+
         LocalDate joinDate = req.getJoinDate() != null ? req.getJoinDate() : LocalDate.now();
         int cycleDay = req.getBillingCycleDay() != null ? req.getBillingCycleDay() : joinDate.getDayOfMonth();
         LocalDate nextBilling = req.getNextBillingDate() != null ? req.getNextBillingDate() : joinDate.plusMonths(1);
@@ -122,7 +126,10 @@ public class SubscriberService {
         }
         s.setEmail(req.getEmail());
         s.setAddress(req.getAddress());
-        s.setPppoeUsername(req.getPppoeUsername());
+        if (req.getPppoeUsername() == null || req.getPppoeUsername().isBlank()) {
+            throw new IllegalArgumentException("PPPoE username is mandatory");
+        }
+        s.setPppoeUsername(req.getPppoeUsername().trim());
         if (req.getPppoePassword() != null) {
             s.setPppoePassword(req.getPppoePassword());
         }

@@ -36,6 +36,7 @@ public class CreateSubscriberRequest {
     private LocalDate currentBillingPeriodEnd;
     private SubscriberStatus status;
 
+    @NotBlank(message = "PPPoE username is mandatory")
     private String pppoeUsername;
     private String pppoePassword;
     private String ipAddress;

@@ -100,9 +100,14 @@ export default function Subscribers({ onTriggerCycle }) {
 
   const handleCreateSubscriber = async (e) => {
     e.preventDefault();
+    if (!formData.pppoeUsername || !formData.pppoeUsername.trim()) {
+      alert('PPPoE username is mandatory');
+      return;
+    }
     try {
       await apiClient.post('/subscribers', {
         ...formData,
+        pppoeUsername: formData.pppoeUsername.trim(),
         packageId: Number(formData.packageId),
         initialDeposit: formData.initialDeposit ? Number(formData.initialDeposit) : 0,
         motherIspRateOverride: formData.motherIspRateOverride ? Number(formData.motherIspRateOverride) : null
@@ -152,9 +157,14 @@ export default function Subscribers({ onTriggerCycle }) {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    if (!editFormData.pppoeUsername || !editFormData.pppoeUsername.trim()) {
+      alert('PPPoE username is mandatory');
+      return;
+    }
     try {
       await apiClient.put(`/subscribers/${selectedSub.id}`, {
         ...editFormData,
+        pppoeUsername: editFormData.pppoeUsername.trim(),
         packageId: Number(editFormData.packageId),
         billingCycleDay: editFormData.billingCycleDay ? Number(editFormData.billingCycleDay) : null,
         nextBillingDate: editFormData.nextBillingDate || null,
@@ -213,7 +223,8 @@ export default function Subscribers({ onTriggerCycle }) {
   const filteredSubs = subscribers.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
     s.phone.includes(search) ||
-    s.subscriberCode.toLowerCase().includes(search.toLowerCase())
+    s.subscriberCode.toLowerCase().includes(search.toLowerCase()) ||
+    (s.pppoeUsername && s.pppoeUsername.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -263,7 +274,7 @@ export default function Subscribers({ onTriggerCycle }) {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by subscriber name, phone, or subscriber ID..."
+          placeholder="Search by subscriber name, phone, subscriber ID, or PPPoE username..."
           className="w-full text-xs text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
         />
       </div>
@@ -275,6 +286,7 @@ export default function Subscribers({ onTriggerCycle }) {
             <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3 px-4">Subscriber</th>
+                <th className="py-3 px-4">PPPoE User</th>
                 <th className="py-3 px-4">Plan &amp; Speed</th>
                 <th className="py-3 px-4">Join Date &amp; Cycle Day</th>
                 <th className="py-3 px-4">Next Renewal</th>
@@ -286,11 +298,11 @@ export default function Subscribers({ onTriggerCycle }) {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading subscribers...</td>
+                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading subscribers...</td>
                 </tr>
               ) : filteredSubs.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-slate-400 dark:text-slate-500">No subscribers found.</td>
+                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500">No subscribers found.</td>
                 </tr>
               ) : (
                 filteredSubs.map((sub) => {
@@ -322,6 +334,19 @@ export default function Subscribers({ onTriggerCycle }) {
                             </>
                           )}
                         </div>
+                      </td>
+
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-xs bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">
+                            {sub.pppoeUsername || '—'}
+                          </span>
+                        </div>
+                        {sub.ipAddress && (
+                          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">
+                            {sub.ipAddress}
+                          </div>
+                        )}
                       </td>
 
                       <td className="py-4 px-4">
@@ -504,9 +529,10 @@ export default function Subscribers({ onTriggerCycle }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username *</label>
               <input
                 type="text"
+                required
                 value={formData.pppoeUsername}
                 onChange={e => setFormData({ ...formData, pppoeUsername: e.target.value })}
                 className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
@@ -576,9 +602,15 @@ export default function Subscribers({ onTriggerCycle }) {
               <span className="text-slate-500 dark:text-slate-400">Current Plan:</span>{' '}
               <span className="font-semibold text-slate-900 dark:text-white">{selectedSub?.packageName} (৳{selectedSub?.packagePrice}/mo)</span>
             </div>
-            <div className="text-right">
-              <span className="text-slate-500 dark:text-slate-400 text-[11px]">Subscriber Code:</span>{' '}
-              <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedSub?.subscriberCode}</span>
+            <div className="text-right flex items-center gap-3">
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 text-[11px] block">PPPoE User:</span>
+                <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">{selectedSub?.pppoeUsername || '—'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Subscriber Code:</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">{selectedSub?.subscriberCode}</span>
+              </div>
             </div>
           </div>
 
@@ -752,9 +784,10 @@ export default function Subscribers({ onTriggerCycle }) {
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username *</label>
                 <input
                   type="text"
+                  required
                   value={editFormData.pppoeUsername}
                   onChange={e => setEditFormData({ ...editFormData, pppoeUsername: e.target.value })}
                   className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
@@ -830,8 +863,9 @@ export default function Subscribers({ onTriggerCycle }) {
                 ৳{Number(selectedSub?.walletBalance || 0).toFixed(2)}
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-              Monthly Package Fee: ৳{selectedSub?.packagePrice}
+            <div className="flex justify-between items-center text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
+              <span>Monthly Package Fee: <strong className="text-slate-800 dark:text-slate-200">৳{selectedSub?.packagePrice}</strong></span>
+              <span className="font-mono text-xs">PPPoE: <strong className="text-blue-600 dark:text-blue-400">{selectedSub?.pppoeUsername}</strong></span>
             </div>
           </div>
 
@@ -1102,7 +1136,9 @@ export default function Subscribers({ onTriggerCycle }) {
           <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <div>
               <span className="font-semibold text-slate-900 dark:text-white">{selectedSub?.name}</span> ({selectedSub?.subscriberCode})
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Plan: {selectedSub?.packageName}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Plan: {selectedSub?.packageName} • PPPoE: <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{selectedSub?.pppoeUsername}</span>
+              </p>
             </div>
             <div className="text-right">
               <span className="text-slate-500 dark:text-slate-400 text-[11px]">Current Balance</span>

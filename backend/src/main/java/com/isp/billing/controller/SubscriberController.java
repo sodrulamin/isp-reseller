@@ -61,7 +61,7 @@ public class SubscriberController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateSubscriber(@PathVariable Long id, @RequestBody CreateSubscriberRequest req) {
+    public ResponseEntity<?> updateSubscriber(@PathVariable Long id, @Valid @RequestBody CreateSubscriberRequest req) {
         Reseller r = workspaceContext.getActiveReseller();
         if (r == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
