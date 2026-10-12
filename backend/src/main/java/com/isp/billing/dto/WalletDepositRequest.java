@@ -12,6 +12,11 @@ public class WalletDepositRequest {
     private String transactionReference;
     private String notes;
 
+    // Optional billing cycle restart upon payment
+    private boolean updateBillingCycle = false;
+    private String newBillingStartDate; // "YYYY-MM-DD" e.g. today or reconnection date
+    private Integer newBillingCycleDay;  // 1-31 (defaults to day of newBillingStartDate)
+
     public WalletDepositRequest() {}
 
     public BigDecimal getAmount() { return amount; }
@@ -28,4 +33,13 @@ public class WalletDepositRequest {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public boolean isUpdateBillingCycle() { return updateBillingCycle; }
+    public void setUpdateBillingCycle(boolean updateBillingCycle) { this.updateBillingCycle = updateBillingCycle; }
+
+    public String getNewBillingStartDate() { return newBillingStartDate; }
+    public void setNewBillingStartDate(String newBillingStartDate) { this.newBillingStartDate = newBillingStartDate; }
+
+    public Integer getNewBillingCycleDay() { return newBillingCycleDay; }
+    public void setNewBillingCycleDay(Integer newBillingCycleDay) { this.newBillingCycleDay = newBillingCycleDay; }
 }

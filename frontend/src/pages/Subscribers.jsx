@@ -109,12 +109,16 @@ export default function Subscribers({ onTriggerCycle }) {
 
   const handleOpenDeposit = (sub) => {
     setSelectedSub(sub);
+    const today = new Date().toISOString().substring(0, 10);
     setDepositData({
       amount: '',
       paymentChannel: 'DIRECT_RESELLER',
       paymentMethod: 'CASH',
       transactionReference: '',
-      notes: ''
+      notes: '',
+      updateBillingCycle: false,
+      newBillingStartDate: today,
+      newBillingCycleDay: new Date().getDate()
     });
     setIsDepositModalOpen(true);
   };
@@ -511,7 +515,18 @@ export default function Subscribers({ onTriggerCycle }) {
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Deposit Amount (৳) *</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300">Deposit Amount (৳) *</label>
+              {Number(selectedSub?.walletBalance || 0) < 0 && (
+                <button
+                  type="button"
+                  onClick={() => setDepositData({ ...depositData, amount: String(Math.abs(Number(selectedSub?.walletBalance))) })}
+                  className="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                >
+                  Pay Full Due (৳{Math.abs(Number(selectedSub?.walletBalance)).toFixed(2)})
+                </button>
+              )}
+            </div>
             <input
               type="number"
               step="0.01"
@@ -521,6 +536,92 @@ export default function Subscribers({ onTriggerCycle }) {
               className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               placeholder="0.00"
             />
+            {/* Quick amount shortcuts */}
+            {selectedSub?.packagePrice && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <span className="text-[10px] text-slate-400">Quick Fill:</span>
+                <button
+                  type="button"
+                  onClick={() => setDepositData({ ...depositData, amount: String(Number(selectedSub.packagePrice)) })}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                >
+                  1 Mo (৳{selectedSub.packagePrice})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDepositData({ ...depositData, amount: String(Number(selectedSub.packagePrice) * 2) })}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                >
+                  2 Mo (৳{Number(selectedSub.packagePrice) * 2})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDepositData({ ...depositData, amount: String(Number(selectedSub.packagePrice) * 3) })}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                >
+                  3 Mo (৳{Number(selectedSub.packagePrice) * 3})
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* New Billing Cycle Section (Restart / Reconnect Line) */}
+          <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-xl border border-blue-200/80 dark:border-blue-900/50 space-y-2.5">
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={depositData.updateBillingCycle}
+                onChange={e => setDepositData({ ...depositData, updateBillingCycle: e.target.checked })}
+                className="mt-0.5 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <div className="flex-1">
+                <span className="font-bold text-xs text-slate-900 dark:text-white block">
+                  Update / Reset Billing Cycle on Payment
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                  Check this if the line was off or you are restarting a fresh 1-month cycle with Mother ISP from a new date.
+                </span>
+              </div>
+            </label>
+
+            {depositData.updateBillingCycle && (
+              <div className="pt-2 border-t border-blue-100 dark:border-blue-900/40 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 text-[11px] mb-1">
+                    Cycle Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    required={depositData.updateBillingCycle}
+                    value={depositData.newBillingStartDate}
+                    onChange={e => {
+                      const newDate = e.target.value;
+                      const day = newDate ? new Date(newDate).getDate() : depositData.newBillingCycleDay;
+                      setDepositData({
+                        ...depositData,
+                        newBillingStartDate: newDate,
+                        newBillingCycleDay: day
+                      });
+                    }}
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 text-[11px] mb-1">
+                    Monthly Renewal Day
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={depositData.newBillingCycleDay}
+                    onChange={e => setDepositData({ ...depositData, newBillingCycleDay: Number(e.target.value) })}
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-blue-500"
+                    placeholder="1 - 31"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Real-time Mother ISP split preview when paid via Mother ISP Portal */}

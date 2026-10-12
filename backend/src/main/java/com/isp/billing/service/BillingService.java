@@ -280,6 +280,58 @@ public class BillingService {
             invoiceRepository.save(inv);
         }
 
+        // If requested, update/reset the subscriber's billing cycle period and next billing date
+        if (req.isUpdateBillingCycle()) {
+            LocalDate startDate;
+            if (req.getNewBillingStartDate() != null && !req.getNewBillingStartDate().isBlank()) {
+                startDate = LocalDate.parse(req.getNewBillingStartDate());
+            } else {
+                startDate = LocalDate.now();
+            }
+
+            int cycleDay = req.getNewBillingCycleDay() != null && req.getNewBillingCycleDay() >= 1 && req.getNewBillingCycleDay() <= 31
+                    ? req.getNewBillingCycleDay()
+                    : startDate.getDayOfMonth();
+
+            subscriber.setBillingCycleDay(cycleDay);
+            subscriber.setCurrentBillingPeriodStart(startDate);
+
+            LocalDate nextCycle = startDate.plusMonths(1);
+            int targetDay = Math.min(cycleDay, nextCycle.lengthOfMonth());
+            nextCycle = nextCycle.withDayOfMonth(targetDay);
+
+            subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
+            subscriber.setNextBillingDate(nextCycle);
+            subscriber.setStatus(SubscriberStatus.ACTIVE);
+
+            // Record Mother ISP Payout for this newly activated/reconnected cycle period
+            InternetPackage pkg = subscriber.getInternetPackage();
+            BigDecimal packagePrice = pkg.getMonthlyPrice();
+            BigDecimal disbursementRate = subscriber.getMotherIspRateOverride() != null
+                    ? subscriber.getMotherIspRateOverride()
+                    : reseller.getMotherIspDisbursementPercentage();
+
+            BigDecimal motherIspAmount = packagePrice.multiply(disbursementRate)
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+            MotherIspPayout payout = new MotherIspPayout(
+                    reseller,
+                    subscriber,
+                    pkg,
+                    startDate,
+                    packagePrice,
+                    disbursementRate,
+                    motherIspAmount,
+                    LocalDate.now(),
+                    "PAID",
+                    "Cycle renewed on payment starting " + startDate
+            );
+            payout.setTransactionRef("M-ISP-" + startDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId());
+            motherIspPayoutRepository.save(payout);
+
+            log.info("Reset billing cycle for subscriber {} to start {} (next: {})", subscriber.getSubscriberCode(), startDate, nextCycle);
+        }
+
         return subscriberRepository.save(subscriber);
     }
 
