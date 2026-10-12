@@ -51,7 +51,17 @@ public class BillingController {
             return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
         }
         billingService.forceRenewSubscriber(id, r.getId());
-        return ResponseEntity.ok(Map.of("message", "Subscriber billing renewed successfully and mother ISP fee disbursed."));
+        return ResponseEntity.ok(Map.of("message", "Subscriber billing renewed successfully."));
+    }
+
+    @PostMapping("/subscribers/{id}/renew-credit")
+    public ResponseEntity<?> renewSubscriberOnCredit(@PathVariable Long id) {
+        Reseller r = workspaceContext.getActiveReseller();
+        if (r == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
+        }
+        billingService.renewSubscriberOnCredit(id, r.getId());
+        return ResponseEntity.ok(Map.of("message", "Subscriber renewed on reseller credit. Mother ISP fee disbursed and customer line kept active."));
     }
 
     @GetMapping("/mother-isp-payouts")

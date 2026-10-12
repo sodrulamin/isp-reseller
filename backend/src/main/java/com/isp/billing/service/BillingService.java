@@ -96,10 +96,11 @@ public class BillingService {
 
     /**
      * Core monthly billing renewal algorithm:
-     * 1. Reseller incurs obligation to pay Mother ISP for this subscriber's new month.
-     * 2. Subscriber wallet is debited by package price (can go negative for delayed payment, or stay positive for advance).
-     * 3. An invoice is generated for this billing cycle.
-     * 4. Billing cycle period start and next billing date are advanced by 1 month.
+     * 1. Subscriber wallet is debited by package price.
+     * 2. An invoice is generated for this billing cycle.
+     * 3. IF covered in full by advance balance: invoice is PAID, subscriber is ACTIVE, and Mother ISP payout is recorded.
+     * 4. IF NOT covered (due): invoice is DUE/PARTIAL, subscriber is SUSPENDED, and NO disbursement to Mother ISP occurs.
+     * 5. Billing cycle period start and next billing date are advanced by 1 month.
      */
     @Transactional
     public void processMonthlyCycleRenewal(Subscriber subscriber, LocalDate cycleDate) {
@@ -107,30 +108,7 @@ public class BillingService {
         InternetPackage pkg = subscriber.getInternetPackage();
         BigDecimal packagePrice = pkg.getMonthlyPrice();
 
-        // 1. Calculate and record Mother ISP Payout Expense
-        BigDecimal disbursementRate = subscriber.getMotherIspRateOverride() != null
-                ? subscriber.getMotherIspRateOverride()
-                : reseller.getMotherIspDisbursementPercentage();
-
-        BigDecimal motherIspAmount = packagePrice.multiply(disbursementRate)
-                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-
-        MotherIspPayout payout = new MotherIspPayout(
-                reseller,
-                subscriber,
-                pkg,
-                cycleDate,
-                packagePrice,
-                disbursementRate,
-                motherIspAmount,
-                LocalDate.now(),
-                "PAID",
-                "Cycle renewal for period starting " + cycleDate
-        );
-        payout.setTransactionRef("M-ISP-" + cycleDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId());
-        motherIspPayoutRepository.save(payout);
-
-        // 2. Debit Subscriber Wallet for new month package fee
+        // 1. Debit Subscriber Wallet for new month package fee
         BigDecimal balanceBefore = subscriber.getWalletBalance();
         BigDecimal balanceAfter = balanceBefore.subtract(packagePrice);
         subscriber.setWalletBalance(balanceAfter);
@@ -148,7 +126,7 @@ public class BillingService {
         );
         walletTransactionRepository.save(deductionTx);
 
-        // 3. Create Invoice
+        // 2. Create Invoice
         Invoice invoice = new Invoice();
         invoice.setReseller(reseller);
         invoice.setSubscriber(subscriber);
@@ -161,28 +139,38 @@ public class BillingService {
         invoice.setEquipmentAmount(BigDecimal.ZERO);
         invoice.setTotalAmount(packagePrice);
 
-        if (balanceBefore.compareTo(packagePrice) >= 0) {
-            // Paid in advance
+        boolean isFullyCovered = balanceBefore.compareTo(packagePrice) >= 0;
+
+        if (isFullyCovered) {
+            // Paid in advance from wallet
             invoice.setPaidAmount(packagePrice);
             invoice.setDueAmount(BigDecimal.ZERO);
             invoice.setStatus("PAID");
             invoice.setNotes("Settled automatically from subscriber advance wallet balance");
+            subscriber.setStatus(SubscriberStatus.ACTIVE);
+
+            // Reseller disburses to Mother ISP because payment is covered in full
+            recordMotherIspPayoutForCycle(reseller, subscriber, cycleDate, "Cycle renewal paid in advance for period starting " + cycleDate);
         } else if (balanceBefore.compareTo(BigDecimal.ZERO) > 0) {
             // Partially covered by existing balance
             invoice.setPaidAmount(balanceBefore);
             invoice.setDueAmount(packagePrice.subtract(balanceBefore));
             invoice.setStatus("PARTIAL");
             invoice.setNotes("Partially deducted from advance balance. Remaining due: " + invoice.getDueAmount());
+            subscriber.setStatus(SubscriberStatus.SUSPENDED);
+            // NO disbursement to Mother ISP because due is not yet approved/paid!
         } else {
             // Unpaid / delayed payment
             invoice.setPaidAmount(BigDecimal.ZERO);
             invoice.setDueAmount(packagePrice);
             invoice.setStatus("DUE");
             invoice.setNotes("Delayed payment. Added to subscriber wallet overdue balance.");
+            subscriber.setStatus(SubscriberStatus.SUSPENDED);
+            // NO disbursement to Mother ISP because due is not yet approved/paid!
         }
         invoiceRepository.save(invoice);
 
-        // 4. Advance billing dates to next month
+        // 3. Advance billing dates to next month
         subscriber.setCurrentBillingPeriodStart(cycleDate);
         LocalDate nextCycle = cycleDate.plusMonths(1);
         // Adjust for day of month (e.g. 31st -> 28th/30th)
@@ -192,7 +180,8 @@ public class BillingService {
         subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
 
         subscriberRepository.save(subscriber);
-        log.info("Successfully renewed cycle for subscriber {} (next cycle: {})", subscriber.getSubscriberCode(), nextCycle);
+        log.info("Successfully processed cycle for subscriber {} (status: {}, next cycle: {})", 
+                subscriber.getSubscriberCode(), subscriber.getStatus(), nextCycle);
     }
 
     /**
@@ -275,6 +264,10 @@ public class BillingService {
                 inv.setStatus("PAID");
                 inv.setNotes((inv.getNotes() != null ? inv.getNotes() + " | " : "") + "Cleared by deposit " + ref);
                 available = available.subtract(needed);
+
+                // Due invoice cleared! Disburse to Mother ISP for this billing period
+                recordMotherIspPayoutForCycle(reseller, subscriber, inv.getBillingPeriodStart(), 
+                        "Disbursement upon settling due invoice " + inv.getInvoiceNumber());
             } else {
                 inv.setPaidAmount(inv.getPaidAmount().add(available));
                 inv.setDueAmount(inv.getDueAmount().subtract(available));
@@ -283,6 +276,12 @@ public class BillingService {
                 available = BigDecimal.ZERO;
             }
             invoiceRepository.save(inv);
+        }
+
+        // Restore active subscriber status if dues are settled
+        if (subscriber.getWalletBalance().compareTo(BigDecimal.ZERO) >= 0 && 
+                (subscriber.getStatus() == SubscriberStatus.SUSPENDED || subscriber.getStatus() == SubscriberStatus.EXPIRED)) {
+            subscriber.setStatus(SubscriberStatus.ACTIVE);
         }
 
         // If requested, update/reset the subscriber's billing cycle period and next billing date
@@ -310,29 +309,8 @@ public class BillingService {
             subscriber.setStatus(SubscriberStatus.ACTIVE);
 
             // Record Mother ISP Payout for this newly activated/reconnected cycle period
-            InternetPackage pkg = subscriber.getInternetPackage();
-            BigDecimal packagePrice = pkg.getMonthlyPrice();
-            BigDecimal disbursementRate = subscriber.getMotherIspRateOverride() != null
-                    ? subscriber.getMotherIspRateOverride()
-                    : reseller.getMotherIspDisbursementPercentage();
-
-            BigDecimal motherIspAmount = packagePrice.multiply(disbursementRate)
-                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-
-            MotherIspPayout payout = new MotherIspPayout(
-                    reseller,
-                    subscriber,
-                    pkg,
-                    startDate,
-                    packagePrice,
-                    disbursementRate,
-                    motherIspAmount,
-                    LocalDate.now(),
-                    "PAID",
-                    "Cycle renewed on payment starting " + startDate
-            );
-            payout.setTransactionRef("M-ISP-" + startDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId());
-            motherIspPayoutRepository.save(payout);
+            recordMotherIspPayoutForCycle(reseller, subscriber, startDate, 
+                    "Cycle renewed on payment starting " + startDate);
 
             log.info("Reset billing cycle for subscriber {} to start {} (next: {})", subscriber.getSubscriberCode(), startDate, nextCycle);
         }
@@ -439,6 +417,109 @@ public class BillingService {
 
         invoice = invoiceRepository.findById(invoiceId).orElse(invoice);
         return mapInvoiceToDto(invoice);
+    }
+
+    @Transactional
+    public void renewSubscriberOnCredit(Long subscriberId, Long resellerId) {
+        Subscriber subscriber = subscriberRepository.findById(subscriberId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscriber not found"));
+        if (!subscriber.getReseller().getId().equals(resellerId)) {
+            throw new IllegalArgumentException("Unauthorized");
+        }
+
+        Reseller reseller = subscriber.getReseller();
+        InternetPackage pkg = subscriber.getInternetPackage();
+        BigDecimal packagePrice = pkg.getMonthlyPrice();
+        LocalDate cycleDate = subscriber.getNextBillingDate() != null ? subscriber.getNextBillingDate() : LocalDate.now();
+
+        // 1. Reseller explicitly pays Mother ISP out of own pocket to keep line active
+        recordMotherIspPayoutForCycle(reseller, subscriber, cycleDate, "Renewed on reseller credit for period starting " + cycleDate);
+
+        // 2. Debit Subscriber Wallet (customer due)
+        BigDecimal balanceBefore = subscriber.getWalletBalance();
+        BigDecimal balanceAfter = balanceBefore.subtract(packagePrice);
+        subscriber.setWalletBalance(balanceAfter);
+
+        SubscriberWalletTransaction tx = new SubscriberWalletTransaction(
+                reseller,
+                subscriber,
+                "CREDIT_RENEWAL",
+                packagePrice,
+                balanceBefore,
+                balanceAfter,
+                "RESELLER_CREDIT",
+                "CRED-" + cycleDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId(),
+                "Renewed on reseller credit for " + pkg.getName() + " (paid Mother ISP to keep line active)"
+        );
+        walletTransactionRepository.save(tx);
+
+        // 3. Create DUE invoice
+        Invoice invoice = new Invoice();
+        invoice.setReseller(reseller);
+        invoice.setSubscriber(subscriber);
+        invoice.setInvoiceNumber("INV-" + cycleDate.format(DateTimeFormatter.ofPattern("yyyyMM")) + "-" + subscriber.getSubscriberCode());
+        invoice.setInvoiceDate(cycleDate);
+        invoice.setDueDate(cycleDate.plusDays(7));
+        invoice.setBillingPeriodStart(cycleDate);
+        invoice.setBillingPeriodEnd(cycleDate.plusMonths(1).minusDays(1));
+        invoice.setPackageAmount(packagePrice);
+        invoice.setEquipmentAmount(BigDecimal.ZERO);
+        invoice.setTotalAmount(packagePrice);
+        invoice.setPaidAmount(BigDecimal.ZERO);
+        invoice.setDueAmount(packagePrice);
+        invoice.setStatus("DUE");
+        invoice.setNotes("Line kept active via reseller credit (paid to Mother ISP). Customer due to be collected.");
+        invoiceRepository.save(invoice);
+
+        // 4. Advance cycle dates and ensure ACTIVE status
+        subscriber.setStatus(SubscriberStatus.ACTIVE);
+        subscriber.setCurrentBillingPeriodStart(cycleDate);
+        LocalDate nextCycle = cycleDate.plusMonths(1);
+        int targetDay = Math.min(subscriber.getBillingCycleDay(), nextCycle.lengthOfMonth());
+        nextCycle = nextCycle.withDayOfMonth(targetDay);
+        subscriber.setNextBillingDate(nextCycle);
+        subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
+
+        subscriberRepository.save(subscriber);
+        log.info("Subscriber {} renewed on credit. Mother ISP disbursed, customer line active.", subscriber.getSubscriberCode());
+    }
+
+    public MotherIspPayout recordMotherIspPayoutForCycle(Reseller reseller, Subscriber subscriber, LocalDate cycleDate, String notes) {
+        if (cycleDate == null) {
+            cycleDate = subscriber.getCurrentBillingPeriodStart() != null ? subscriber.getCurrentBillingPeriodStart() : LocalDate.now();
+        }
+
+        // Prevent duplicate disbursement for the same subscriber and cycle date
+        if (motherIspPayoutRepository.existsBySubscriberIdAndCycleDate(subscriber.getId(), cycleDate)) {
+            log.info("Mother ISP payout already exists for subscriber {} on cycle date {}", subscriber.getSubscriberCode(), cycleDate);
+            return null;
+        }
+
+        InternetPackage pkg = subscriber.getInternetPackage();
+        BigDecimal packagePrice = pkg.getMonthlyPrice();
+        BigDecimal disbursementRate = subscriber.getMotherIspRateOverride() != null
+                ? subscriber.getMotherIspRateOverride()
+                : reseller.getMotherIspDisbursementPercentage();
+
+        BigDecimal motherIspAmount = packagePrice.multiply(disbursementRate)
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+        MotherIspPayout payout = new MotherIspPayout(
+                reseller,
+                subscriber,
+                pkg,
+                cycleDate,
+                packagePrice,
+                disbursementRate,
+                motherIspAmount,
+                LocalDate.now(),
+                "PAID",
+                notes != null ? notes : ("Disbursement for period starting " + cycleDate)
+        );
+        payout.setTransactionRef("M-ISP-" + cycleDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId());
+        MotherIspPayout saved = motherIspPayoutRepository.save(payout);
+        log.info("Recorded Mother ISP payout of ৳{} for subscriber {} (cycle: {})", motherIspAmount, subscriber.getSubscriberCode(), cycleDate);
+        return saved;
     }
 
     public InvoiceDto mapInvoiceToDto(Invoice inv) {
