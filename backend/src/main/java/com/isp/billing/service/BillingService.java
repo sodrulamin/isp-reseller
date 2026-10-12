@@ -1,6 +1,7 @@
 package com.isp.billing.service;
 
 import com.isp.billing.dto.ApproveInvoiceRequest;
+import com.isp.billing.dto.RejectInvoiceRequest;
 import com.isp.billing.dto.InvoiceDto;
 import com.isp.billing.dto.MotherIspPayoutDto;
 import com.isp.billing.dto.WalletDepositRequest;
@@ -416,6 +417,59 @@ public class BillingService {
         depositToWallet(invoice.getSubscriber().getId(), resellerId, depositReq);
 
         invoice = invoiceRepository.findById(invoiceId).orElse(invoice);
+        return mapInvoiceToDto(invoice);
+    }
+
+    @Transactional
+    public InvoiceDto rejectInvoice(Long invoiceId, Long resellerId, RejectInvoiceRequest req) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + invoiceId));
+        if (!invoice.getReseller().getId().equals(resellerId)) {
+            throw new IllegalArgumentException("Unauthorized: invoice does not belong to your workspace");
+        }
+
+        if ("PAID".equals(invoice.getStatus())) {
+            throw new IllegalArgumentException("Cannot reject an invoice that is already paid in full");
+        }
+        if ("REJECTED".equals(invoice.getStatus())) {
+            throw new IllegalArgumentException("Invoice is already marked as rejected");
+        }
+
+        BigDecimal dueAmount = invoice.getDueAmount();
+        Subscriber subscriber = invoice.getSubscriber();
+        Reseller reseller = invoice.getReseller();
+
+        String reason = (req != null && req.getReason() != null && !req.getReason().isBlank())
+                ? req.getReason().trim()
+                : "Due bill rejected by admin";
+
+        // Reverse the due portion that was debited from subscriber's wallet
+        if (dueAmount.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal balanceBefore = subscriber.getWalletBalance();
+            BigDecimal balanceAfter = balanceBefore.add(dueAmount);
+            subscriber.setWalletBalance(balanceAfter);
+
+            SubscriberWalletTransaction tx = new SubscriberWalletTransaction(
+                    reseller,
+                    subscriber,
+                    "INVOICE_REJECTION_REVERSAL",
+                    dueAmount,
+                    balanceBefore,
+                    balanceAfter,
+                    "SYSTEM_REVERSAL",
+                    "REV-" + invoice.getInvoiceNumber(),
+                    "Reversal for rejected due invoice " + invoice.getInvoiceNumber() + ": " + reason
+            );
+            walletTransactionRepository.save(tx);
+            subscriberRepository.save(subscriber);
+        }
+
+        invoice.setStatus("REJECTED");
+        invoice.setDueAmount(BigDecimal.ZERO);
+        invoice.setNotes((invoice.getNotes() != null ? invoice.getNotes() + " | " : "") + "Rejected: " + reason);
+        invoice = invoiceRepository.save(invoice);
+
+        log.info("Invoice {} rejected for subscriber {} with reason: {}", invoice.getInvoiceNumber(), subscriber.getSubscriberCode(), reason);
         return mapInvoiceToDto(invoice);
     }
 

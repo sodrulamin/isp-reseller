@@ -6,6 +6,7 @@ import {
   Receipt,
   Search,
   CheckCircle2,
+  XCircle,
   Clock,
   AlertCircle,
   Wallet,
@@ -30,6 +31,11 @@ export default function Invoices() {
     transactionReference: '',
     notes: ''
   });
+
+  // Reject Due Invoice Modal
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [selectedRejectInvoice, setSelectedRejectInvoice] = useState(null);
+  const [rejectReason, setRejectReason] = useState('Customer disconnected / Line inactive');
 
   const loadInvoices = async () => {
     setLoading(true);
@@ -70,6 +76,26 @@ export default function Invoices() {
       loadInvoices();
     } catch (err) {
       alert(err.message || 'Failed to approve due bill');
+    }
+  };
+
+  const handleOpenReject = (inv) => {
+    setSelectedRejectInvoice(inv);
+    setRejectReason('Customer disconnected / Line inactive');
+    setIsRejectModalOpen(true);
+  };
+
+  const handleRejectSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedRejectInvoice) return;
+    try {
+      await apiClient.post(`/billing/invoices/${selectedRejectInvoice.id}/reject`, {
+        reason: rejectReason
+      });
+      setIsRejectModalOpen(false);
+      loadInvoices();
+    } catch (err) {
+      alert(err.message || 'Failed to reject due invoice');
     }
   };
 
@@ -175,6 +201,8 @@ export default function Invoices() {
                             ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                             : inv.status === 'PARTIAL'
                             ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                            : inv.status === 'REJECTED'
+                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700'
                             : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                         }`}>
                           {inv.status}
@@ -182,15 +210,30 @@ export default function Invoices() {
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
-                        {hasDue ? (
-                          <button
-                            onClick={() => handleOpenApprove(inv)}
-                            title="Approve and collect due bill"
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm mx-auto"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Approve Due</span>
-                          </button>
+                        {hasDue && inv.status !== 'REJECTED' ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => handleOpenApprove(inv)}
+                              title="Approve and collect due bill"
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Approve</span>
+                            </button>
+                            <button
+                              onClick={() => handleOpenReject(inv)}
+                              title="Reject due invoice"
+                              className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm border border-rose-200 dark:border-rose-800"
+                            >
+                              <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                              <span>Reject</span>
+                            </button>
+                          </div>
+                        ) : inv.status === 'REJECTED' ? (
+                          <span className="inline-flex items-center gap-1 text-slate-400 dark:text-slate-500 font-semibold text-xs">
+                            <XCircle className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Rejected</span>
+                          </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -363,6 +406,95 @@ export default function Invoices() {
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Approve &amp; Settle (৳{approveData.amount || '0.00'})</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Reject Due Invoice Modal */}
+      <Modal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        title={`Reject Due Invoice: ${selectedRejectInvoice?.invoiceNumber}`}
+      >
+        <form onSubmit={handleRejectSubmit} className="space-y-4 text-xs">
+          {/* Invoice Summary */}
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="font-bold text-slate-900 dark:text-white text-sm">{selectedRejectInvoice?.subscriberName}</span>
+                <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">
+                  ID: {selectedRejectInvoice?.subscriberCode} {selectedRejectInvoice?.pppoeUsername ? `• PPPoE: ${selectedRejectInvoice.pppoeUsername}` : ''}
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-semibold block">Due Amount to Reject</span>
+                <span className="font-extrabold text-rose-600 dark:text-rose-400 text-base">
+                  ৳{Number(selectedRejectInvoice?.dueAmount || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+            <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
+              <span>Period: {selectedRejectInvoice?.billingPeriodStart} to {selectedRejectInvoice?.billingPeriodEnd}</span>
+              <span>Total Bill: ৳{Number(selectedRejectInvoice?.totalAmount || 0).toFixed(2)}</span>
+            </div>
+          </div>
+
+          {/* Warning Banner */}
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 rounded-xl text-amber-800 dark:text-amber-300 space-y-1">
+            <div className="font-bold flex items-center gap-1.5 text-xs">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span>Consequences of Rejecting:</span>
+            </div>
+            <ul className="list-disc list-inside space-y-0.5 text-[11px] pl-1">
+              <li>The outstanding due of ৳{Number(selectedRejectInvoice?.dueAmount || 0).toFixed(2)} will be cancelled.</li>
+              <li>The subscriber wallet will be credited back the debited due amount.</li>
+              <li>No disbursement to Mother ISP will be made.</li>
+            </ul>
+          </div>
+
+          {/* Rejection Reason */}
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Rejection Reason *
+            </label>
+            <div className="space-y-2">
+              <select
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-rose-500"
+              >
+                <option value="Customer disconnected / Line inactive">Customer disconnected / Line inactive</option>
+                <option value="Customer refused to pay renewal bill">Customer refused to pay renewal bill</option>
+                <option value="Billed in error / Incorrect cycle">Billed in error / Incorrect cycle</option>
+                <option value="Customer migrated / Account cancelled">Customer migrated / Account cancelled</option>
+                <option value="Other">Other (specify below)</option>
+              </select>
+              <input
+                type="text"
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-rose-500"
+                placeholder="Specify rejection details or reason..."
+                required
+              />
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsRejectModalOpen(false)}
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
+            >
+              <XCircle className="w-4 h-4" />
+              <span>Confirm Rejection</span>
             </button>
           </div>
         </form>

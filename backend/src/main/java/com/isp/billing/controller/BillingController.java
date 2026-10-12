@@ -1,6 +1,7 @@
 package com.isp.billing.controller;
 
 import com.isp.billing.dto.ApproveInvoiceRequest;
+import com.isp.billing.dto.RejectInvoiceRequest;
 import com.isp.billing.dto.InvoiceDto;
 import com.isp.billing.dto.MotherIspPayoutDto;
 import com.isp.billing.dto.WalletTransactionDto;
@@ -94,6 +95,22 @@ public class BillingController {
         InvoiceDto dto = billingService.approveInvoice(id, r.getId(), req);
         return ResponseEntity.ok(Map.of(
                 "message", "Due bill approved and settled successfully",
+                "invoice", dto
+        ));
+    }
+
+    @PostMapping("/invoices/{id}/reject")
+    public ResponseEntity<?> rejectInvoice(@PathVariable Long id, @RequestBody(required = false) RejectInvoiceRequest req) {
+        Reseller r = workspaceContext.getActiveReseller();
+        if (r == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
+        }
+        if (req == null) {
+            req = new RejectInvoiceRequest();
+        }
+        InvoiceDto dto = billingService.rejectInvoice(id, r.getId(), req);
+        return ResponseEntity.ok(Map.of(
+                "message", "Due invoice rejected successfully",
                 "invoice", dto
         ));
     }
