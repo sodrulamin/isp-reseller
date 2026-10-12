@@ -20,6 +20,7 @@ public class InvoiceDto {
     private BigDecimal paidAmount;
     private BigDecimal dueAmount;
     private String status;
+    private boolean motherIspDisbursed;
     private String pppoeUsername;
     private String notes;
     private LocalDateTime createdAt;
@@ -76,6 +77,9 @@ public class InvoiceDto {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public boolean isMotherIspDisbursed() { return motherIspDisbursed; }
+    public void setMotherIspDisbursed(boolean motherIspDisbursed) { this.motherIspDisbursed = motherIspDisbursed; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

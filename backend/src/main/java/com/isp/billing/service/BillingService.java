@@ -147,11 +147,10 @@ public class BillingService {
             invoice.setPaidAmount(packagePrice);
             invoice.setDueAmount(BigDecimal.ZERO);
             invoice.setStatus("PAID");
-            invoice.setNotes("Settled automatically from subscriber advance wallet balance");
+            invoice.setNotes("Settled automatically from subscriber advance wallet balance. Awaiting reseller disbursement approval.");
             subscriber.setStatus(SubscriberStatus.ACTIVE);
-
-            // Reseller disburses to Mother ISP because payment is covered in full
-            recordMotherIspPayoutForCycle(reseller, subscriber, cycleDate, "Cycle renewal paid in advance for period starting " + cycleDate);
+            // Mother ISP disbursement is NOT automatically recorded here.
+            // As per requirement: "Disbursement to mother isp should be done only when I approve the invoice."
         } else if (balanceBefore.compareTo(BigDecimal.ZERO) > 0) {
             // Partially covered by existing balance
             invoice.setPaidAmount(balanceBefore);
@@ -159,7 +158,6 @@ public class BillingService {
             invoice.setStatus("PARTIAL");
             invoice.setNotes("Partially deducted from advance balance. Remaining due: " + invoice.getDueAmount());
             subscriber.setStatus(SubscriberStatus.SUSPENDED);
-            // NO disbursement to Mother ISP because due is not yet approved/paid!
         } else {
             // Unpaid / delayed payment
             invoice.setPaidAmount(BigDecimal.ZERO);
@@ -167,8 +165,8 @@ public class BillingService {
             invoice.setStatus("DUE");
             invoice.setNotes("Delayed payment. Added to subscriber wallet overdue balance.");
             subscriber.setStatus(SubscriberStatus.SUSPENDED);
-            // NO disbursement to Mother ISP because due is not yet approved/paid!
         }
+        invoice.setMotherIspDisbursed(false);
         invoiceRepository.save(invoice);
 
         // 3. Advance billing dates to next month
@@ -265,10 +263,6 @@ public class BillingService {
                 inv.setStatus("PAID");
                 inv.setNotes((inv.getNotes() != null ? inv.getNotes() + " | " : "") + "Cleared by deposit " + ref);
                 available = available.subtract(needed);
-
-                // Due invoice cleared! Disburse to Mother ISP for this billing period
-                recordMotherIspPayoutForCycle(reseller, subscriber, inv.getBillingPeriodStart(), 
-                        "Disbursement upon settling due invoice " + inv.getInvoiceNumber());
             } else {
                 inv.setPaidAmount(inv.getPaidAmount().add(available));
                 inv.setDueAmount(inv.getDueAmount().subtract(available));
@@ -308,10 +302,6 @@ public class BillingService {
             subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
             subscriber.setNextBillingDate(nextCycle);
             subscriber.setStatus(SubscriberStatus.ACTIVE);
-
-            // Record Mother ISP Payout for this newly activated/reconnected cycle period
-            recordMotherIspPayoutForCycle(reseller, subscriber, startDate, 
-                    "Cycle renewed on payment starting " + startDate);
 
             log.info("Reset billing cycle for subscriber {} to start {} (next: {})", subscriber.getSubscriberCode(), startDate, nextCycle);
         }
@@ -394,29 +384,57 @@ public class BillingService {
             throw new IllegalArgumentException("Unauthorized: invoice does not belong to your workspace");
         }
 
-        BigDecimal dueAmount = invoice.getDueAmount();
-        if (dueAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invoice is already paid in full");
+        if ("REJECTED".equals(invoice.getStatus())) {
+            throw new IllegalArgumentException("Cannot approve a rejected invoice");
         }
 
-        BigDecimal payAmount = (req != null && req.getAmount() != null && req.getAmount().compareTo(BigDecimal.ZERO) > 0)
-                ? req.getAmount()
-                : dueAmount;
+        if (invoice.isMotherIspDisbursed() && invoice.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invoice is already approved and disbursed to Mother ISP");
+        }
 
-        WalletDepositRequest depositReq = new WalletDepositRequest();
-        depositReq.setAmount(payAmount);
-        depositReq.setPaymentChannel(req != null && req.getPaymentChannel() != null ? req.getPaymentChannel() : "DIRECT_RESELLER");
-        depositReq.setPaymentMethod(req != null && req.getPaymentMethod() != null ? req.getPaymentMethod() : "CASH");
-        depositReq.setTransactionReference(req != null && req.getTransactionReference() != null && !req.getTransactionReference().isBlank()
-                ? req.getTransactionReference()
-                : "INV-APPV-" + invoice.getInvoiceNumber());
-        depositReq.setNotes(req != null && req.getNotes() != null && !req.getNotes().isBlank()
-                ? req.getNotes()
-                : ("Approved due bill settlement for " + invoice.getInvoiceNumber()));
+        Subscriber subscriber = invoice.getSubscriber();
+        Reseller reseller = invoice.getReseller();
+        BigDecimal dueAmount = invoice.getDueAmount();
 
-        depositToWallet(invoice.getSubscriber().getId(), resellerId, depositReq);
+        // 1. Settle due amount if outstanding
+        if (dueAmount.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal payAmount = (req != null && req.getAmount() != null && req.getAmount().compareTo(BigDecimal.ZERO) > 0)
+                    ? req.getAmount()
+                    : dueAmount;
 
-        invoice = invoiceRepository.findById(invoiceId).orElse(invoice);
+            WalletDepositRequest depositReq = new WalletDepositRequest();
+            depositReq.setAmount(payAmount);
+            depositReq.setPaymentChannel(req != null && req.getPaymentChannel() != null ? req.getPaymentChannel() : "DIRECT_RESELLER");
+            depositReq.setPaymentMethod(req != null && req.getPaymentMethod() != null ? req.getPaymentMethod() : "CASH");
+            depositReq.setTransactionReference(req != null && req.getTransactionReference() != null && !req.getTransactionReference().isBlank()
+                    ? req.getTransactionReference()
+                    : "INV-APPV-" + invoice.getInvoiceNumber());
+            depositReq.setNotes(req != null && req.getNotes() != null && !req.getNotes().isBlank()
+                    ? req.getNotes()
+                    : ("Approved due bill settlement for " + invoice.getInvoiceNumber()));
+
+            depositToWallet(subscriber.getId(), resellerId, depositReq);
+
+            invoice = invoiceRepository.findById(invoiceId).orElse(invoice);
+        }
+
+        // 2. DISBURSE TO MOTHER ISP (Done ONLY when the reseller approves the invoice)
+        LocalDate cycleDate = invoice.getBillingPeriodStart() != null ? invoice.getBillingPeriodStart() : invoice.getInvoiceDate();
+        recordMotherIspPayoutForCycle(reseller, subscriber, cycleDate, 
+                "Disbursement on approval of invoice " + invoice.getInvoiceNumber());
+
+        invoice.setMotherIspDisbursed(true);
+        if (invoice.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            invoice.setStatus("PAID");
+        }
+        invoice = invoiceRepository.save(invoice);
+
+        // Keep / restore subscriber line to ACTIVE
+        subscriber.setStatus(SubscriberStatus.ACTIVE);
+        subscriberRepository.save(subscriber);
+
+        log.info("Invoice {} approved. Mother ISP disbursed and subscriber {} line active.", 
+                invoice.getInvoiceNumber(), subscriber.getSubscriberCode());
         return mapInvoiceToDto(invoice);
     }
 
@@ -522,6 +540,7 @@ public class BillingService {
         invoice.setPaidAmount(BigDecimal.ZERO);
         invoice.setDueAmount(packagePrice);
         invoice.setStatus("DUE");
+        invoice.setMotherIspDisbursed(true);
         invoice.setNotes("Line kept active via reseller credit (paid to Mother ISP). Customer due to be collected.");
         invoiceRepository.save(invoice);
 
@@ -594,6 +613,7 @@ public class BillingService {
         dto.setPaidAmount(inv.getPaidAmount());
         dto.setDueAmount(inv.getDueAmount());
         dto.setStatus(inv.getStatus());
+        dto.setMotherIspDisbursed(inv.isMotherIspDisbursed());
         dto.setNotes(inv.getNotes());
         dto.setCreatedAt(inv.getCreatedAt());
         return dto;

@@ -51,6 +51,9 @@ public class Invoice {
     @Column(nullable = false, length = 30)
     private String status = "DUE"; // PAID, PARTIAL, DUE, ADVANCE_SETTLED
 
+    @Column(nullable = false)
+    private boolean motherIspDisbursed = false;
+
     @Column(length = 255)
     private String notes;
 
@@ -102,6 +105,9 @@ public class Invoice {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public boolean isMotherIspDisbursed() { return motherIspDisbursed; }
+    public void setMotherIspDisbursed(boolean motherIspDisbursed) { this.motherIspDisbursed = motherIspDisbursed; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

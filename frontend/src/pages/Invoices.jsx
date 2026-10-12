@@ -55,12 +55,13 @@ export default function Invoices() {
 
   const handleOpenApprove = (inv) => {
     setSelectedInvoice(inv);
+    const due = Number(inv.dueAmount || 0);
     setApproveData({
-      amount: String(inv.dueAmount || inv.totalAmount || 0),
+      amount: String(due > 0 ? due : 0),
       paymentChannel: 'DIRECT_RESELLER',
       paymentMethod: 'CASH',
       transactionReference: '',
-      notes: `Due bill approval for ${inv.invoiceNumber}`
+      notes: `Approval & Mother ISP disbursement for ${inv.invoiceNumber}`
     });
     setIsApproveModalOpen(true);
   };
@@ -141,17 +142,18 @@ export default function Invoices() {
                 <th className="py-3 px-4">Paid Amount</th>
                 <th className="py-3 px-4 font-bold">Due Amount</th>
                 <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-center">Mother ISP</th>
                 <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading invoices...</td>
+                  <td colSpan="10" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading invoices...</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="py-8 text-center text-slate-400 dark:text-slate-500">No invoices found.</td>
+                  <td colSpan="10" className="py-8 text-center text-slate-400 dark:text-slate-500">No invoices found.</td>
                 </tr>
               ) : (
                 filtered.map(inv => {
@@ -210,30 +212,50 @@ export default function Invoices() {
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
-                        {hasDue && inv.status !== 'REJECTED' ? (
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() => handleOpenApprove(inv)}
-                              title="Approve and collect due bill"
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Approve</span>
-                            </button>
-                            <button
-                              onClick={() => handleOpenReject(inv)}
-                              title="Reject due invoice"
-                              className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm border border-rose-200 dark:border-rose-800"
-                            >
-                              <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                              <span>Reject</span>
-                            </button>
-                          </div>
-                        ) : inv.status === 'REJECTED' ? (
+                        {inv.status === 'REJECTED' ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-400">
+                            Cancelled
+                          </span>
+                        ) : inv.motherIspDisbursed ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 inline-flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            Disbursed
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-amber-500" />
+                            Awaiting Approval
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        {inv.status === 'REJECTED' ? (
                           <span className="inline-flex items-center gap-1 text-slate-400 dark:text-slate-500 font-semibold text-xs">
                             <XCircle className="w-3.5 h-3.5 text-slate-400" />
                             <span>Rejected</span>
                           </span>
+                        ) : !inv.motherIspDisbursed || hasDue ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => handleOpenApprove(inv)}
+                              title={hasDue ? "Approve and settle customer due with Mother ISP disbursement" : "Approve and disburse to Mother ISP"}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm whitespace-nowrap"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{hasDue ? "Approve" : "Approve & Disburse"}</span>
+                            </button>
+                            {hasDue && (
+                              <button
+                                onClick={() => handleOpenReject(inv)}
+                                title="Reject due invoice"
+                                className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm border border-rose-200 dark:border-rose-800"
+                              >
+                                <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                                <span>Reject</span>
+                              </button>
+                            )}
+                          </div>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -279,107 +301,121 @@ export default function Invoices() {
             </div>
           </div>
 
-          {/* Payment Collection Channel */}
-          <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Payment Collected Through *
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
-                approveData.paymentChannel === 'DIRECT_RESELLER'
-                  ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 shadow-sm'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="paymentChannel"
-                    value="DIRECT_RESELLER"
-                    checked={approveData.paymentChannel === 'DIRECT_RESELLER'}
-                    onChange={() => setApproveData({ ...approveData, paymentChannel: 'DIRECT_RESELLER', paymentMethod: 'CASH' })}
-                    className="text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="font-bold text-xs">Collected by Me</span>
+          {Number(selectedInvoice?.dueAmount || 0) <= 0 ? (
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/70 rounded-xl text-blue-800 dark:text-blue-300 space-y-1">
+              <div className="font-bold flex items-center gap-1.5 text-xs">
+                <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span>Advance Settlement Covered</span>
+              </div>
+              <p className="text-[11px]">
+                This invoice was covered in full from the subscriber's advance wallet balance. Approving will disburse the Mother ISP share and confirm continuation of their line.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Payment Collection Channel */}
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Payment Collected Through *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
+                    approveData.paymentChannel === 'DIRECT_RESELLER'
+                      ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="paymentChannel"
+                        value="DIRECT_RESELLER"
+                        checked={approveData.paymentChannel === 'DIRECT_RESELLER'}
+                        onChange={() => setApproveData({ ...approveData, paymentChannel: 'DIRECT_RESELLER', paymentMethod: 'CASH' })}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="font-bold text-xs">Collected by Me</span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                      Direct Cash or MFS. Reseller collects and owes Mother ISP share.
+                    </span>
+                  </label>
+
+                  <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
+                    approveData.paymentChannel === 'MOTHER_ISP_PORTAL'
+                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="paymentChannel"
+                        value="MOTHER_ISP_PORTAL"
+                        checked={approveData.paymentChannel === 'MOTHER_ISP_PORTAL'}
+                        onChange={() => setApproveData({ ...approveData, paymentChannel: 'MOTHER_ISP_PORTAL', paymentMethod: 'ONLINE_PORTAL' })}
+                        className="text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="font-bold text-xs">Mother ISP Portal</span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                      Customer paid Mother ISP portal directly. Mother ISP retains fee and credits your profit.
+                    </span>
+                  </label>
                 </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
-                  Direct Cash or MFS. Reseller collects and owes Mother ISP share.
-                </span>
-              </label>
+              </div>
 
-              <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
-                approveData.paymentChannel === 'MOTHER_ISP_PORTAL'
-                  ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 shadow-sm'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="paymentChannel"
-                    value="MOTHER_ISP_PORTAL"
-                    checked={approveData.paymentChannel === 'MOTHER_ISP_PORTAL'}
-                    onChange={() => setApproveData({ ...approveData, paymentChannel: 'MOTHER_ISP_PORTAL', paymentMethod: 'ONLINE_PORTAL' })}
-                    className="text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="font-bold text-xs">Mother ISP Portal</span>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Approve / Settle Amount (৳) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={approveData.amount}
+                  onChange={e => setApproveData({ ...approveData, amount: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
+                  <select
+                    value={approveData.paymentMethod}
+                    onChange={e => setApproveData({ ...approveData, paymentMethod: e.target.value })}
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                  >
+                    {approveData.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
+                      <>
+                        <option value="ONLINE_PORTAL">Mother ISP Portal / Gateway</option>
+                        <option value="BKASH">bKash (Mother ISP Portal)</option>
+                        <option value="NAGAD">Nagad (Mother ISP Portal)</option>
+                        <option value="BANK_TRANSFER">Bank (Mother ISP Portal)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="CASH">Cash in Hand</option>
+                        <option value="BKASH">bKash Personal / Merchant</option>
+                        <option value="NAGAD">Nagad</option>
+                        <option value="ROCKET">Rocket</option>
+                        <option value="BANK_TRANSFER">Bank Wire / Transfer</option>
+                      </>
+                    )}
+                  </select>
                 </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
-                  Customer paid Mother ISP portal directly. Mother ISP retains fee and credits your profit.
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Approve / Settle Amount (৳) *
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              value={approveData.amount}
-              onChange={e => setApproveData({ ...approveData, amount: e.target.value })}
-              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
-              <select
-                value={approveData.paymentMethod}
-                onChange={e => setApproveData({ ...approveData, paymentMethod: e.target.value })}
-                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-              >
-                {approveData.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
-                  <>
-                    <option value="ONLINE_PORTAL">Mother ISP Portal / Gateway</option>
-                    <option value="BKASH">bKash (Mother ISP Portal)</option>
-                    <option value="NAGAD">Nagad (Mother ISP Portal)</option>
-                    <option value="BANK_TRANSFER">Bank (Mother ISP Portal)</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="CASH">Cash in Hand</option>
-                    <option value="BKASH">bKash Personal / Merchant</option>
-                    <option value="NAGAD">Nagad</option>
-                    <option value="ROCKET">Rocket</option>
-                    <option value="BANK_TRANSFER">Bank Wire / Transfer</option>
-                  </>
-                )}
-              </select>
-            </div>
-            <div>
-              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / TrxID</label>
-              <input
-                type="text"
-                value={approveData.transactionReference}
-                onChange={e => setApproveData({ ...approveData, transactionReference: e.target.value })}
-                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
-                placeholder="e.g. TRX-98129"
-              />
-            </div>
-          </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / TrxID</label>
+                  <input
+                    type="text"
+                    value={approveData.transactionReference}
+                    onChange={e => setApproveData({ ...approveData, transactionReference: e.target.value })}
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                    placeholder="e.g. TRX-98129"
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Description</label>
@@ -405,7 +441,7 @@ export default function Invoices() {
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Approve &amp; Settle (৳{approveData.amount || '0.00'})</span>
+              <span>{Number(selectedInvoice?.dueAmount || 0) > 0 ? `Approve & Settle (৳${approveData.amount || '0.00'})` : 'Approve & Disburse to Mother ISP'}</span>
             </button>
           </div>
         </form>
