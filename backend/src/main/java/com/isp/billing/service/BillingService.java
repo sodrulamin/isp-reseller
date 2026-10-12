@@ -46,10 +46,10 @@ public class BillingService {
     /**
      * Run daily automated cycle check (at 01:00 AM every night)
      */
-    @Scheduled(cron = "${billing.cycle.cron:0 0 1 * * ?}", zone = "${billing.cycle.zone:Asia/Dhaka}")
+    @Scheduled(cron = "${billing.cycle.cron:0 */5 * * * ?}", zone = "${billing.cycle.zone:Asia/Dhaka}")
     @Transactional
     public int runDailyBillingCycle() {
-        log.info("Starting daily billing cycle check for active subscribers at 01:00 AM...");
+        log.info("Executing scheduled billing cycle check for active subscribers...");
         LocalDate today = LocalDate.now();
         List<Subscriber> dueSubscribers = subscriberRepository.findSubscribersDueForRenewal(today);
         log.info("Found {} subscribers due for billing cycle renewal", dueSubscribers.size());

@@ -13,6 +13,7 @@ services:
       SPRING_DATASOURCE_USERNAME: "isp_billing_only_user"
       SPRING_DATASOURCE_PASSWORD: "0xd_Eye]47JF"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
+      BILLING_CYCLE_CRON: "0 */5 * * * ?"
     networks:
       - sas-net
 

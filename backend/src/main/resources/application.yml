@@ -29,7 +29,7 @@ jwt:
 
 billing:
   cycle:
-    cron: "${BILLING_CYCLE_CRON:0 0 1 * * ?}" # Runs every night at 1:00 AM
+    cron: "${BILLING_CYCLE_CRON:0 */5 * * * ?}" # Runs every 5 minutes for testing (e.g. at :00, :05, :10, :15...)
     zone: "${BILLING_CYCLE_ZONE:Asia/Dhaka}"
 
 logging:
