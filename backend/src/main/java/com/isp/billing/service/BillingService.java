@@ -47,7 +47,7 @@ public class BillingService {
     /**
      * Run daily automated cycle check (at 01:00 AM every night)
      */
-    @Scheduled(cron = "${billing.cycle.cron:0 */5 * * * ?}", zone = "${billing.cycle.zone:Asia/Dhaka}")
+    @Scheduled(cron = "${billing.cycle.cron:0 0 1 * * ?}", zone = "${billing.cycle.zone:Asia/Dhaka}")
     @Transactional
     public int runDailyBillingCycle() {
         log.info("Executing scheduled billing cycle check for active subscribers...");
