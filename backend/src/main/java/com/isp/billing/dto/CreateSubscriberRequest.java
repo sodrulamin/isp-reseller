@@ -1,5 +1,6 @@
 package com.isp.billing.dto;
 
+import com.isp.billing.entity.SubscriberStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -28,6 +29,12 @@ public class CreateSubscriberRequest {
 
     // Optional initial deposit amount
     private BigDecimal initialDeposit = BigDecimal.ZERO;
+
+    private Integer billingCycleDay;
+    private LocalDate nextBillingDate;
+    private LocalDate currentBillingPeriodStart;
+    private LocalDate currentBillingPeriodEnd;
+    private SubscriberStatus status;
 
     private String pppoeUsername;
     private String pppoePassword;
@@ -74,4 +81,19 @@ public class CreateSubscriberRequest {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public Integer getBillingCycleDay() { return billingCycleDay; }
+    public void setBillingCycleDay(Integer billingCycleDay) { this.billingCycleDay = billingCycleDay; }
+
+    public LocalDate getNextBillingDate() { return nextBillingDate; }
+    public void setNextBillingDate(LocalDate nextBillingDate) { this.nextBillingDate = nextBillingDate; }
+
+    public LocalDate getCurrentBillingPeriodStart() { return currentBillingPeriodStart; }
+    public void setCurrentBillingPeriodStart(LocalDate currentBillingPeriodStart) { this.currentBillingPeriodStart = currentBillingPeriodStart; }
+
+    public LocalDate getCurrentBillingPeriodEnd() { return currentBillingPeriodEnd; }
+    public void setCurrentBillingPeriodEnd(LocalDate currentBillingPeriodEnd) { this.currentBillingPeriodEnd = currentBillingPeriodEnd; }
+
+    public SubscriberStatus getStatus() { return status; }
+    public void setStatus(SubscriberStatus status) { this.status = status; }
 }

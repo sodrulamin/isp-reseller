@@ -59,7 +59,8 @@ public class SubscriberService {
         }
 
         LocalDate joinDate = req.getJoinDate() != null ? req.getJoinDate() : LocalDate.now();
-        int cycleDay = joinDate.getDayOfMonth();
+        int cycleDay = req.getBillingCycleDay() != null ? req.getBillingCycleDay() : joinDate.getDayOfMonth();
+        LocalDate nextBilling = req.getNextBillingDate() != null ? req.getNextBillingDate() : joinDate.plusMonths(1);
 
         String code = req.getSubscriberCode();
         if (code == null || code.isBlank()) {
@@ -78,8 +79,8 @@ public class SubscriberService {
         subscriber.setJoinDate(joinDate);
         subscriber.setBillingCycleDay(cycleDay);
         subscriber.setCurrentBillingPeriodStart(joinDate);
-        subscriber.setCurrentBillingPeriodEnd(joinDate.plusMonths(1).minusDays(1));
-        subscriber.setNextBillingDate(joinDate.plusMonths(1));
+        subscriber.setCurrentBillingPeriodEnd(nextBilling.minusDays(1));
+        subscriber.setNextBillingDate(nextBilling);
         subscriber.setMotherIspRateOverride(req.getMotherIspRateOverride());
         subscriber.setWalletBalance(BigDecimal.ZERO);
         subscriber.setStatus(SubscriberStatus.ACTIVE);
@@ -110,20 +111,60 @@ public class SubscriberService {
     @Transactional
     public SubscriberDto updateSubscriber(Long id, Long resellerId, CreateSubscriberRequest req) {
         Subscriber s = getSubscriber(id, resellerId);
-        s.setName(req.getName());
-        s.setPhone(req.getPhone());
+        if (req.getSubscriberCode() != null && !req.getSubscriberCode().isBlank()) {
+            s.setSubscriberCode(req.getSubscriberCode().trim());
+        }
+        if (req.getName() != null && !req.getName().isBlank()) {
+            s.setName(req.getName().trim());
+        }
+        if (req.getPhone() != null && !req.getPhone().isBlank()) {
+            s.setPhone(req.getPhone().trim());
+        }
         s.setEmail(req.getEmail());
         s.setAddress(req.getAddress());
         s.setPppoeUsername(req.getPppoeUsername());
-        s.setPppoePassword(req.getPppoePassword());
+        if (req.getPppoePassword() != null) {
+            s.setPppoePassword(req.getPppoePassword());
+        }
         s.setIpAddress(req.getIpAddress());
         s.setNotes(req.getNotes());
         s.setMotherIspRateOverride(req.getMotherIspRateOverride());
 
-        if (req.getPackageId() != null && !req.getPackageId().equals(s.getInternetPackage().getId())) {
+        if (req.getPackageId() != null && (s.getInternetPackage() == null || !req.getPackageId().equals(s.getInternetPackage().getId()))) {
             InternetPackage newPkg = packageRepository.findById(req.getPackageId())
                     .orElseThrow(() -> new IllegalArgumentException("Package not found"));
             s.setInternetPackage(newPkg);
+        }
+
+        if (req.getJoinDate() != null) {
+            s.setJoinDate(req.getJoinDate());
+        }
+
+        if (req.getStatus() != null) {
+            s.setStatus(req.getStatus());
+        }
+
+        if (req.getBillingCycleDay() != null) {
+            s.setBillingCycleDay(req.getBillingCycleDay());
+        }
+
+        if (req.getNextBillingDate() != null) {
+            s.setNextBillingDate(req.getNextBillingDate());
+            if (req.getBillingCycleDay() == null) {
+                s.setBillingCycleDay(req.getNextBillingDate().getDayOfMonth());
+            }
+        }
+
+        if (req.getCurrentBillingPeriodStart() != null) {
+            s.setCurrentBillingPeriodStart(req.getCurrentBillingPeriodStart());
+        } else if (req.getNextBillingDate() != null) {
+            s.setCurrentBillingPeriodStart(req.getNextBillingDate().minusMonths(1));
+        }
+
+        if (req.getCurrentBillingPeriodEnd() != null) {
+            s.setCurrentBillingPeriodEnd(req.getCurrentBillingPeriodEnd());
+        } else if (req.getNextBillingDate() != null) {
+            s.setCurrentBillingPeriodEnd(req.getNextBillingDate().minusDays(1));
         }
 
         return mapToDto(subscriberRepository.save(s));
@@ -165,6 +206,7 @@ public class SubscriberService {
         dto.setWalletBalance(s.getWalletBalance());
         dto.setStatus(s.getStatus());
         dto.setPppoeUsername(s.getPppoeUsername());
+        dto.setPppoePassword(s.getPppoePassword());
         dto.setIpAddress(s.getIpAddress());
         dto.setNotes(s.getNotes());
         return dto;

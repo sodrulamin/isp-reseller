@@ -27,6 +27,7 @@ public class SubscriberDto {
     private BigDecimal walletBalance;
     private SubscriberStatus status;
     private String pppoeUsername;
+    private String pppoePassword;
     private String ipAddress;
     private String notes;
 
@@ -97,6 +98,9 @@ public class SubscriberDto {
 
     public String getPppoeUsername() { return pppoeUsername; }
     public void setPppoeUsername(String pppoeUsername) { this.pppoeUsername = pppoeUsername; }
+
+    public String getPppoePassword() { return pppoePassword; }
+    public void setPppoePassword(String pppoePassword) { this.pppoePassword = pppoePassword; }
 
     public String getIpAddress() { return ipAddress; }
     public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }

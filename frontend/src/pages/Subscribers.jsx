@@ -16,7 +16,8 @@ import {
   Phone,
   Mail,
   MapPin,
-  Tag
+  Tag,
+  Edit2
 } from 'lucide-react';
 
 export default function Subscribers({ onTriggerCycle }) {
@@ -28,6 +29,7 @@ export default function Subscribers({ onTriggerCycle }) {
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
   const [selectedSub, setSelectedSub] = useState(null);
@@ -45,6 +47,25 @@ export default function Subscribers({ onTriggerCycle }) {
     motherIspRateOverride: '',
     pppoeUsername: '',
     pppoePassword: '',
+    notes: ''
+  });
+
+  // Edit Subscriber Form
+  const [editFormData, setEditFormData] = useState({
+    subscriberCode: '',
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    packageId: '',
+    joinDate: '',
+    billingCycleDay: '',
+    nextBillingDate: '',
+    status: 'ACTIVE',
+    motherIspRateOverride: '',
+    pppoeUsername: '',
+    pppoePassword: '',
+    ipAddress: '',
     notes: ''
   });
 
@@ -104,6 +125,46 @@ export default function Subscribers({ onTriggerCycle }) {
       if (onTriggerCycle) onTriggerCycle();
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handleOpenEdit = (sub) => {
+    setSelectedSub(sub);
+    setEditFormData({
+      subscriberCode: sub.subscriberCode || '',
+      name: sub.name || '',
+      phone: sub.phone || '',
+      email: sub.email || '',
+      address: sub.address || '',
+      packageId: sub.packageId ? String(sub.packageId) : '',
+      joinDate: sub.joinDate || '',
+      billingCycleDay: sub.billingCycleDay || '',
+      nextBillingDate: sub.nextBillingDate || '',
+      status: sub.status || 'ACTIVE',
+      motherIspRateOverride: sub.motherIspRateOverride !== null && sub.motherIspRateOverride !== undefined ? String(sub.motherIspRateOverride) : '',
+      pppoeUsername: sub.pppoeUsername || '',
+      pppoePassword: sub.pppoePassword || '',
+      ipAddress: sub.ipAddress || '',
+      notes: sub.notes || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await apiClient.put(`/subscribers/${selectedSub.id}`, {
+        ...editFormData,
+        packageId: Number(editFormData.packageId),
+        billingCycleDay: editFormData.billingCycleDay ? Number(editFormData.billingCycleDay) : null,
+        nextBillingDate: editFormData.nextBillingDate || null,
+        motherIspRateOverride: editFormData.motherIspRateOverride !== '' ? Number(editFormData.motherIspRateOverride) : null
+      });
+      setIsEditModalOpen(false);
+      loadData();
+      if (onTriggerCycle) onTriggerCycle();
+    } catch (err) {
+      alert(err.message || 'Failed to update subscriber details');
     }
   };
 
@@ -240,12 +301,26 @@ export default function Subscribers({ onTriggerCycle }) {
                   return (
                     <tr key={sub.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="py-4 px-4">
-                        <div className="font-bold text-slate-900 dark:text-white text-base">{sub.name}</div>
+                        <div
+                          onClick={() => handleOpenEdit(sub)}
+                          className="font-bold text-slate-900 dark:text-white text-base hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors"
+                          title="Click to edit subscriber details"
+                        >
+                          {sub.name}
+                        </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 font-mono flex items-center gap-2 mt-1">
                           <Tag className="w-3.5 h-3.5 text-blue-500" />
                           <span className="font-semibold text-slate-700 dark:text-slate-300">{sub.subscriberCode}</span>
                           <span className="text-slate-300 dark:text-slate-600">•</span>
                           <span>{sub.phone}</span>
+                          {sub.status && sub.status !== 'ACTIVE' && (
+                            <>
+                              <span className="text-slate-300 dark:text-slate-600">•</span>
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                {sub.status}
+                              </span>
+                            </>
+                          )}
                         </div>
                       </td>
 
@@ -265,7 +340,15 @@ export default function Subscribers({ onTriggerCycle }) {
 
                       <td className="py-4 px-4">
                         <div className="text-slate-900 dark:text-slate-200 font-semibold text-sm">{sub.nextBillingDate}</div>
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Active Cycle</div>
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
+                          {sub.status === 'SUSPENDED' ? (
+                            <span className="text-amber-600 dark:text-amber-400">Suspended</span>
+                          ) : sub.status === 'INACTIVE' ? (
+                            <span className="text-rose-600 dark:text-rose-400">Inactive</span>
+                          ) : (
+                            'Active Cycle'
+                          )}
+                        </div>
                       </td>
 
                       <td className="py-4 px-4">
@@ -295,6 +378,14 @@ export default function Subscribers({ onTriggerCycle }) {
                           >
                             <Wallet className="w-4 h-4" />
                             <span>Deposit</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleOpenEdit(sub)}
+                            title="Edit subscriber details"
+                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
 
                           <button
@@ -459,6 +550,265 @@ export default function Subscribers({ onTriggerCycle }) {
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
             >
               Save Subscriber &amp; Start Cycle
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Subscriber Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title={`Edit Subscriber: ${selectedSub?.name} (${selectedSub?.subscriberCode || ''})`}
+        maxWidth="max-w-2xl"
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
+          {/* Quick Info Banner */}
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <div>
+              <span className="text-slate-500 dark:text-slate-400">Current Balance:</span>{' '}
+              <span className={`font-bold ${
+                Number(selectedSub?.walletBalance || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+              }`}>
+                ৳{Number(selectedSub?.walletBalance || 0).toFixed(2)}
+              </span>
+              <span className="text-slate-400 dark:text-slate-500 mx-2">•</span>
+              <span className="text-slate-500 dark:text-slate-400">Current Plan:</span>{' '}
+              <span className="font-semibold text-slate-900 dark:text-white">{selectedSub?.packageName} (৳{selectedSub?.packagePrice}/mo)</span>
+            </div>
+            <div className="text-right">
+              <span className="text-slate-500 dark:text-slate-400 text-[11px]">Subscriber Code:</span>{' '}
+              <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedSub?.subscriberCode}</span>
+            </div>
+          </div>
+
+          {/* Section: Profile & Contact */}
+          <div className="p-3 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-blue-500" />
+              <span>Personal &amp; Contact Details</span>
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscriber Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.name}
+                  onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number *</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.phone}
+                  onChange={e => setEditFormData({ ...editFormData, phone: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address (Optional)</label>
+                <input
+                  type="email"
+                  value={editFormData.email}
+                  onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                  placeholder="subscriber@email.com"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscriber Code / ID</label>
+                <input
+                  type="text"
+                  value={editFormData.subscriberCode}
+                  onChange={e => setEditFormData({ ...editFormData, subscriberCode: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Physical Address</label>
+              <input
+                type="text"
+                value={editFormData.address}
+                onChange={e => setEditFormData({ ...editFormData, address: e.target.value })}
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                placeholder="Building, Road, Area"
+              />
+            </div>
+          </div>
+
+          {/* Section: Plan & Billing Schedule */}
+          <div className="p-3 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Plan &amp; Billing Cycle Settings</span>
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Internet Package *</label>
+                <select
+                  required
+                  value={editFormData.packageId}
+                  onChange={e => setEditFormData({ ...editFormData, packageId: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Package</option>
+                  {packages.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} - ৳{p.monthlyPrice}/mo ({p.speedMbps} Mbps)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Account Status *</label>
+                <select
+                  value={editFormData.status}
+                  onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold"
+                >
+                  <option value="ACTIVE">ACTIVE (Connected)</option>
+                  <option value="SUSPENDED">SUSPENDED (Temporary Hold)</option>
+                  <option value="INACTIVE">INACTIVE (Disconnected)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Join Date</label>
+                <input
+                  type="date"
+                  value={editFormData.joinDate}
+                  onChange={e => setEditFormData({ ...editFormData, joinDate: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Billing Cycle Day (1-31)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={editFormData.billingCycleDay}
+                  onChange={e => setEditFormData({ ...editFormData, billingCycleDay: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold text-indigo-600 dark:text-indigo-400"
+                />
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Day of month cycle renews</p>
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Next Billing Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={editFormData.nextBillingDate}
+                  onChange={e => {
+                    const newDate = e.target.value;
+                    const day = newDate ? new Date(newDate).getDate() : editFormData.billingCycleDay;
+                    setEditFormData({
+                      ...editFormData,
+                      nextBillingDate: newDate,
+                      billingCycleDay: day
+                    });
+                  }}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold text-blue-600 dark:text-blue-400"
+                />
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Next renewal deduction date</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Custom Mother ISP Rate Override (%)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={editFormData.motherIspRateOverride}
+                onChange={e => setEditFormData({ ...editFormData, motherIspRateOverride: e.target.value })}
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                placeholder="Leave blank to use workspace default %"
+              />
+            </div>
+          </div>
+
+          {/* Section: PPPoE & Credentials */}
+          <div className="p-3 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <CreditCard className="w-3.5 h-3.5 text-emerald-500" />
+              <span>PPPoE Credentials &amp; Network</span>
+            </h4>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username</label>
+                <input
+                  type="text"
+                  value={editFormData.pppoeUsername}
+                  onChange={e => setEditFormData({ ...editFormData, pppoeUsername: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="username"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Password</label>
+                <input
+                  type="text"
+                  value={editFormData.pppoePassword}
+                  onChange={e => setEditFormData({ ...editFormData, pppoePassword: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="password"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Static / Assigned IP</label>
+                <input
+                  type="text"
+                  value={editFormData.ipAddress}
+                  onChange={e => setEditFormData({ ...editFormData, ipAddress: e.target.value })}
+                  className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="192.168.x.x"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Notes */}
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Remarks</label>
+            <input
+              type="text"
+              value={editFormData.notes}
+              onChange={e => setEditFormData({ ...editFormData, notes: e.target.value })}
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Line connected near junction box 3"
+            />
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm transition"
+            >
+              Update Subscriber Details
             </button>
           </div>
         </form>
