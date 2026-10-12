@@ -1,5 +1,6 @@
 package com.isp.billing.service;
 
+import com.isp.billing.dto.ApproveInvoiceRequest;
 import com.isp.billing.dto.InvoiceDto;
 import com.isp.billing.dto.MotherIspPayoutDto;
 import com.isp.billing.dto.WalletDepositRequest;
@@ -406,12 +407,47 @@ public class BillingService {
         return dto;
     }
 
+    @Transactional
+    public InvoiceDto approveInvoice(Long invoiceId, Long resellerId, ApproveInvoiceRequest req) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + invoiceId));
+        if (!invoice.getReseller().getId().equals(resellerId)) {
+            throw new IllegalArgumentException("Unauthorized: invoice does not belong to your workspace");
+        }
+
+        BigDecimal dueAmount = invoice.getDueAmount();
+        if (dueAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invoice is already paid in full");
+        }
+
+        BigDecimal payAmount = (req != null && req.getAmount() != null && req.getAmount().compareTo(BigDecimal.ZERO) > 0)
+                ? req.getAmount()
+                : dueAmount;
+
+        WalletDepositRequest depositReq = new WalletDepositRequest();
+        depositReq.setAmount(payAmount);
+        depositReq.setPaymentChannel(req != null && req.getPaymentChannel() != null ? req.getPaymentChannel() : "DIRECT_RESELLER");
+        depositReq.setPaymentMethod(req != null && req.getPaymentMethod() != null ? req.getPaymentMethod() : "CASH");
+        depositReq.setTransactionReference(req != null && req.getTransactionReference() != null && !req.getTransactionReference().isBlank()
+                ? req.getTransactionReference()
+                : "INV-APPV-" + invoice.getInvoiceNumber());
+        depositReq.setNotes(req != null && req.getNotes() != null && !req.getNotes().isBlank()
+                ? req.getNotes()
+                : ("Approved due bill settlement for " + invoice.getInvoiceNumber()));
+
+        depositToWallet(invoice.getSubscriber().getId(), resellerId, depositReq);
+
+        invoice = invoiceRepository.findById(invoiceId).orElse(invoice);
+        return mapInvoiceToDto(invoice);
+    }
+
     public InvoiceDto mapInvoiceToDto(Invoice inv) {
         InvoiceDto dto = new InvoiceDto();
         dto.setId(inv.getId());
         dto.setSubscriberId(inv.getSubscriber().getId());
         dto.setSubscriberName(inv.getSubscriber().getName());
         dto.setSubscriberCode(inv.getSubscriber().getSubscriberCode());
+        dto.setPppoeUsername(inv.getSubscriber().getPppoeUsername());
         dto.setInvoiceNumber(inv.getInvoiceNumber());
         dto.setInvoiceDate(inv.getInvoiceDate());
         dto.setDueDate(inv.getDueDate());

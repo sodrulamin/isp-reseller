@@ -1,13 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { Receipt, Search, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import Modal from '../components/Modal';
+import {
+  Receipt,
+  Search,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Wallet,
+  CreditCard,
+  Tag,
+  ArrowRight
+} from 'lucide-react';
 
 export default function Invoices() {
   const { activeWorkspaceId } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  // Approve Due Bill Modal
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [approveData, setApproveData] = useState({
+    amount: '',
+    paymentChannel: 'DIRECT_RESELLER',
+    paymentMethod: 'CASH',
+    transactionReference: '',
+    notes: ''
+  });
 
   const loadInvoices = async () => {
     setLoading(true);
@@ -25,10 +47,37 @@ export default function Invoices() {
     loadInvoices();
   }, [activeWorkspaceId]);
 
+  const handleOpenApprove = (inv) => {
+    setSelectedInvoice(inv);
+    setApproveData({
+      amount: String(inv.dueAmount || inv.totalAmount || 0),
+      paymentChannel: 'DIRECT_RESELLER',
+      paymentMethod: 'CASH',
+      transactionReference: '',
+      notes: `Due bill approval for ${inv.invoiceNumber}`
+    });
+    setIsApproveModalOpen(true);
+  };
+
+  const handleApproveSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await apiClient.post(`/billing/invoices/${selectedInvoice.id}/approve`, {
+        ...approveData,
+        amount: Number(approveData.amount)
+      });
+      setIsApproveModalOpen(false);
+      loadInvoices();
+    } catch (err) {
+      alert(err.message || 'Failed to approve due bill');
+    }
+  };
+
   const filtered = invoices.filter(inv =>
     (inv.invoiceNumber || '').toLowerCase().includes(search.toLowerCase()) ||
     (inv.subscriberName || '').toLowerCase().includes(search.toLowerCase()) ||
-    (inv.subscriberCode || '').toLowerCase().includes(search.toLowerCase())
+    (inv.subscriberCode || '').toLowerCase().includes(search.toLowerCase()) ||
+    (inv.pppoeUsername || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -37,7 +86,7 @@ export default function Invoices() {
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Subscriber Billing Invoices</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Generated automatically when subscriber monthly billing cycles renew.
+            Generated automatically when subscriber monthly billing cycles renew. Approve and settle outstanding due bills here.
           </p>
         </div>
       </div>
@@ -48,7 +97,7 @@ export default function Invoices() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by invoice number or subscriber..."
+          placeholder="Search by invoice number, subscriber name, subscriber ID, or PPPoE username..."
           className="w-full text-xs text-slate-800 dark:text-slate-200 bg-transparent placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
         />
       </div>
@@ -66,67 +115,258 @@ export default function Invoices() {
                 <th className="py-3 px-4">Paid Amount</th>
                 <th className="py-3 px-4 font-bold">Due Amount</th>
                 <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading invoices...</td>
+                  <td colSpan="9" className="py-8 text-center text-slate-400 dark:text-slate-500">Loading invoices...</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="py-8 text-center text-slate-400 dark:text-slate-500">No invoices found.</td>
+                  <td colSpan="9" className="py-8 text-center text-slate-400 dark:text-slate-500">No invoices found.</td>
                 </tr>
               ) : (
-                filtered.map(inv => (
-                  <tr key={inv.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-semibold text-blue-600 dark:text-blue-400">
-                      {inv.invoiceNumber}
-                    </td>
+                filtered.map(inv => {
+                  const hasDue = Number(inv.dueAmount || 0) > 0;
+                  return (
+                    <tr key={inv.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-semibold text-blue-600 dark:text-blue-400">
+                        {inv.invoiceNumber}
+                      </td>
 
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
-                      {inv.subscriberName}
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{inv.subscriberCode}</div>
-                    </td>
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
+                        <div className="text-sm">{inv.subscriberName}</div>
+                        <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono flex items-center gap-1.5 mt-0.5">
+                          <span>{inv.subscriberCode}</span>
+                          {inv.pppoeUsername && (
+                            <>
+                              <span>•</span>
+                              <span className="text-blue-600 dark:text-blue-400 font-bold">{inv.pppoeUsername}</span>
+                            </>
+                          )}
+                        </div>
+                      </td>
 
-                    <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300">
-                      {inv.billingPeriodStart} to {inv.billingPeriodEnd}
-                    </td>
+                      <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300">
+                        {inv.billingPeriodStart} to {inv.billingPeriodEnd}
+                      </td>
 
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
-                      {inv.dueDate}
-                    </td>
+                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
+                        {inv.dueDate}
+                      </td>
 
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      ৳{Number(inv.totalAmount || 0).toFixed(2)}
-                    </td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                        ৳{Number(inv.totalAmount || 0).toFixed(2)}
+                      </td>
 
-                    <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      ৳{Number(inv.paidAmount || 0).toFixed(2)}
-                    </td>
+                      <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        ৳{Number(inv.paidAmount || 0).toFixed(2)}
+                      </td>
 
-                    <td className="py-3.5 px-4 font-bold text-rose-600 dark:text-rose-400">
-                      ৳{Number(inv.dueAmount || 0).toFixed(2)}
-                    </td>
+                      <td className="py-3.5 px-4 font-bold text-rose-600 dark:text-rose-400">
+                        ৳{Number(inv.dueAmount || 0).toFixed(2)}
+                      </td>
 
-                    <td className="py-3.5 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        inv.status === 'PAID'
-                          ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                          : inv.status === 'PARTIAL'
-                          ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                          : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
-                      }`}>
-                        {inv.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-3.5 px-4 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                          inv.status === 'PAID'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                            : inv.status === 'PARTIAL'
+                            ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                            : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                        }`}>
+                          {inv.status}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        {hasDue ? (
+                          <button
+                            onClick={() => handleOpenApprove(inv)}
+                            title="Approve and collect due bill"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm mx-auto"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Approve Due</span>
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Settled</span>
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Approve Due Bill Modal */}
+      <Modal
+        isOpen={isApproveModalOpen}
+        onClose={() => setIsApproveModalOpen(false)}
+        title={`Approve Due Bill: ${selectedInvoice?.invoiceNumber}`}
+      >
+        <form onSubmit={handleApproveSubmit} className="space-y-4 text-xs">
+          {/* Invoice Overview */}
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="font-bold text-slate-900 dark:text-white text-sm">{selectedInvoice?.subscriberName}</span>
+                <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">
+                  ID: {selectedInvoice?.subscriberCode} {selectedInvoice?.pppoeUsername ? `• PPPoE: ${selectedInvoice.pppoeUsername}` : ''}
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-semibold block">Outstanding Due</span>
+                <span className="font-extrabold text-rose-600 dark:text-rose-400 text-base">
+                  ৳{Number(selectedInvoice?.dueAmount || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+            <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
+              <span>Period: {selectedInvoice?.billingPeriodStart} to {selectedInvoice?.billingPeriodEnd}</span>
+              <span>Total Bill: ৳{Number(selectedInvoice?.totalAmount || 0).toFixed(2)}</span>
+            </div>
+          </div>
+
+          {/* Payment Collection Channel */}
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Payment Collected Through *
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
+                approveData.paymentChannel === 'DIRECT_RESELLER'
+                  ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 shadow-sm'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentChannel"
+                    value="DIRECT_RESELLER"
+                    checked={approveData.paymentChannel === 'DIRECT_RESELLER'}
+                    onChange={() => setApproveData({ ...approveData, paymentChannel: 'DIRECT_RESELLER', paymentMethod: 'CASH' })}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="font-bold text-xs">Collected by Me</span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                  Direct Cash or MFS. Reseller collects and owes Mother ISP share.
+                </span>
+              </label>
+
+              <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
+                approveData.paymentChannel === 'MOTHER_ISP_PORTAL'
+                  ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 shadow-sm'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentChannel"
+                    value="MOTHER_ISP_PORTAL"
+                    checked={approveData.paymentChannel === 'MOTHER_ISP_PORTAL'}
+                    onChange={() => setApproveData({ ...approveData, paymentChannel: 'MOTHER_ISP_PORTAL', paymentMethod: 'ONLINE_PORTAL' })}
+                    className="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="font-bold text-xs">Mother ISP Portal</span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                  Customer paid Mother ISP portal directly. Mother ISP retains fee and credits your profit.
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Approve / Settle Amount (৳) *
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              required
+              value={approveData.amount}
+              onChange={e => setApproveData({ ...approveData, amount: e.target.value })}
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
+              <select
+                value={approveData.paymentMethod}
+                onChange={e => setApproveData({ ...approveData, paymentMethod: e.target.value })}
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              >
+                {approveData.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
+                  <>
+                    <option value="ONLINE_PORTAL">Mother ISP Portal / Gateway</option>
+                    <option value="BKASH">bKash (Mother ISP Portal)</option>
+                    <option value="NAGAD">Nagad (Mother ISP Portal)</option>
+                    <option value="BANK_TRANSFER">Bank (Mother ISP Portal)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="CASH">Cash in Hand</option>
+                    <option value="BKASH">bKash Personal / Merchant</option>
+                    <option value="NAGAD">Nagad</option>
+                    <option value="ROCKET">Rocket</option>
+                    <option value="BANK_TRANSFER">Bank Wire / Transfer</option>
+                  </>
+                )}
+              </select>
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / TrxID</label>
+              <input
+                type="text"
+                value={approveData.transactionReference}
+                onChange={e => setApproveData({ ...approveData, transactionReference: e.target.value })}
+                className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 font-mono"
+                placeholder="e.g. TRX-98129"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Description</label>
+            <input
+              type="text"
+              value={approveData.notes}
+              onChange={e => setApproveData({ ...approveData, notes: e.target.value })}
+              className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+              placeholder="Approval remarks"
+            />
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsApproveModalOpen(false)}
+              className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Approve &amp; Settle (৳{approveData.amount || '0.00'})</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

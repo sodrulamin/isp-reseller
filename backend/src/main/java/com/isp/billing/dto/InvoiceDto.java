@@ -20,6 +20,7 @@ public class InvoiceDto {
     private BigDecimal paidAmount;
     private BigDecimal dueAmount;
     private String status;
+    private String pppoeUsername;
     private String notes;
     private LocalDateTime createdAt;
 
@@ -69,6 +70,9 @@ public class InvoiceDto {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getPppoeUsername() { return pppoeUsername; }
+    public void setPppoeUsername(String pppoeUsername) { this.pppoeUsername = pppoeUsername; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

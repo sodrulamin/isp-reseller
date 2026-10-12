@@ -189,9 +189,41 @@ export default function Subscribers({ onTriggerCycle }) {
       notes: '',
       updateBillingCycle: false,
       newBillingStartDate: today,
-      newBillingCycleDay: new Date().getDate()
+      newBillingCycleDay: new Date().getDate(),
+      isApproveDueMode: false
     });
     setIsDepositModalOpen(true);
+  };
+
+  const handleOpenApproveDue = (sub) => {
+    setSelectedSub(sub);
+    const today = new Date().toISOString().substring(0, 10);
+    const dueAmount = Math.abs(Number(sub.walletBalance || 0));
+    setDepositData({
+      amount: String(dueAmount > 0 ? dueAmount : sub.packagePrice || ''),
+      paymentChannel: 'DIRECT_RESELLER',
+      paymentMethod: 'CASH',
+      transactionReference: '',
+      notes: `Due bill collection for ${sub.name}`,
+      updateBillingCycle: false,
+      newBillingStartDate: today,
+      newBillingCycleDay: new Date().getDate(),
+      isApproveDueMode: true
+    });
+    setIsDepositModalOpen(true);
+  };
+
+  const handleRenewOnCredit = async (sub) => {
+    const confirmMsg = `Approve billing cycle renewal for ${sub.name}?\n\nThis will disburse the Mother ISP payout (৳${Number(sub.motherIspMonthlyPayout || 0).toFixed(2)}) from your balance to keep the subscriber connected, and add the monthly package fee (৳${sub.packagePrice}) to their due account.`;
+    if (!confirm(confirmMsg)) return;
+    try {
+      await apiClient.post(`/billing/subscribers/${sub.id}/renew`);
+      alert(`Billing renewal approved for ${sub.name}. Mother ISP payout recorded and cycle extended.`);
+      loadData();
+      if (onTriggerCycle) onTriggerCycle();
+    } catch (err) {
+      alert('Failed to renew subscriber: ' + (err.message || 'Server error'));
+    }
   };
 
   const handleDepositSubmit = async (e) => {
@@ -396,13 +428,32 @@ export default function Subscribers({ onTriggerCycle }) {
 
                       <td className="py-4 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
+                          {isDue ? (
+                            <button
+                              onClick={() => handleOpenApproveDue(sub)}
+                              title="Approve and collect customer due bill"
+                              className="px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm border border-rose-200 dark:border-rose-800"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                              <span>Approve Due</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenDeposit(sub)}
+                              title="Collect payment / deposit into wallet"
+                              className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm"
+                            >
+                              <Wallet className="w-4 h-4" />
+                              <span>Deposit</span>
+                            </button>
+                          )}
+
                           <button
-                            onClick={() => handleOpenDeposit(sub)}
-                            title="Collect payment / deposit into wallet"
-                            className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-sm"
+                            onClick={() => handleRenewOnCredit(sub)}
+                            title="Renew cycle on credit (pay Mother ISP to keep line active)"
+                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition"
                           >
-                            <Wallet className="w-4 h-4" />
-                            <span>Deposit</span>
+                            <RefreshCw className="w-3.5 h-3.5" />
                           </button>
 
                           <button
@@ -851,7 +902,10 @@ export default function Subscribers({ onTriggerCycle }) {
       <Modal
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}
-        title={`Wallet Payment Deposit: ${selectedSub?.name}`}
+        title={depositData.isApproveDueMode
+          ? `Approve Due Bill: ${selectedSub?.name} (Due: ৳${Math.abs(Number(selectedSub?.walletBalance || 0)).toFixed(2)})`
+          : `Wallet Payment Deposit: ${selectedSub?.name}`
+        }
       >
         <form onSubmit={handleDepositSubmit} className="space-y-4 text-xs">
           <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -1117,9 +1171,10 @@ export default function Subscribers({ onTriggerCycle }) {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
             >
-              Record Payment
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{depositData.isApproveDueMode ? `Approve & Settle Due (৳${depositData.amount || '0.00'})` : 'Record Payment'}</span>
             </button>
           </div>
         </form>
