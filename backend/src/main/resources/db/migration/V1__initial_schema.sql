@@ -193,3 +193,9 @@ CREATE TABLE IF NOT EXISTS `subscriber_wallet_transactions` (
   CONSTRAINT `fk_transactions_reseller` FOREIGN KEY (`reseller_id`) REFERENCES `resellers` (`id`),
   CONSTRAINT `fk_transactions_subscriber` FOREIGN KEY (`subscriber_id`) REFERENCES `subscribers` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- =============================================================================
+-- Seed Initial Super Admin User (superadmin / Password@123)
+-- =============================================================================
+INSERT INTO `users` (`username`, `password`, `full_name`, `email`, `phone`, `role`, `active`, `created_at`, `reseller_id`)
+VALUES ('superadmin', '$2a$10$1LrpX4ViuoM01yLoYjqXR.3j/2i/mwEXhT0G/yiXTG9MKc0QyZIbq', 'Platform Super Admin', 'superadmin@ispbilling.com', '+8801700000000', 'ROLE_SUPER_ADMIN', 1, NOW(6), NULL);
