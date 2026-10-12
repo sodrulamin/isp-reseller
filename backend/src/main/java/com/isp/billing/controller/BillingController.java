@@ -27,14 +27,20 @@ public class BillingController {
     @PostMapping("/run-cycle")
     public ResponseEntity<?> runCycle() {
         Reseller r = workspaceContext.getActiveReseller();
-        if (r == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
+        if (r != null) {
+            int processedCount = billingService.runOnDemandBillingCycle(r.getId());
+            return ResponseEntity.ok(Map.of(
+                    "message", "Billing cycle processed successfully for workspace: " + r.getName(),
+                    "processedSubscribers", processedCount
+            ));
+        } else {
+            // Global run across all workspaces (e.g. triggered by super admin)
+            int processedCount = billingService.runDailyBillingCycle();
+            return ResponseEntity.ok(Map.of(
+                    "message", "Global billing cycle scheduler executed across all workspaces",
+                    "processedSubscribers", processedCount
+            ));
         }
-        int processedCount = billingService.runOnDemandBillingCycle(r.getId());
-        return ResponseEntity.ok(Map.of(
-                "message", "Billing cycle processed successfully",
-                "processedSubscribers", processedCount
-        ));
     }
 
     @PostMapping("/subscribers/{id}/renew")

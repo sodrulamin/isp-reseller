@@ -25,6 +25,12 @@ spring:
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   expirationMs: 86400000 # 24 hours
+  refreshExpirationMs: 604800000 # 7 days
+
+billing:
+  cycle:
+    cron: "${BILLING_CYCLE_CRON:0 0 1 * * ?}" # Runs every night at 1:00 AM
+    zone: "${BILLING_CYCLE_ZONE:Asia/Dhaka}"
 
 logging:
   level:

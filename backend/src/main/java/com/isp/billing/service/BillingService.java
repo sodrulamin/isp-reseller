@@ -44,23 +44,27 @@ public class BillingService {
     }
 
     /**
-     * Run daily automated cycle check (at 01:00 AM every day)
+     * Run daily automated cycle check (at 01:00 AM every night)
      */
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "${billing.cycle.cron:0 0 1 * * ?}", zone = "${billing.cycle.zone:Asia/Dhaka}")
     @Transactional
-    public void runDailyBillingCycle() {
-        log.info("Starting daily billing cycle check for active subscribers...");
+    public int runDailyBillingCycle() {
+        log.info("Starting daily billing cycle check for active subscribers at 01:00 AM...");
         LocalDate today = LocalDate.now();
         List<Subscriber> dueSubscribers = subscriberRepository.findSubscribersDueForRenewal(today);
         log.info("Found {} subscribers due for billing cycle renewal", dueSubscribers.size());
 
+        int processed = 0;
         for (Subscriber sub : dueSubscribers) {
             try {
                 processMonthlyCycleRenewal(sub, sub.getNextBillingDate());
+                processed++;
             } catch (Exception e) {
                 log.error("Failed to process billing cycle for subscriber {}: {}", sub.getSubscriberCode(), e.getMessage());
             }
         }
+        log.info("Daily billing cycle completed: {}/{} subscribers renewed successfully", processed, dueSubscribers.size());
+        return processed;
     }
 
     /**

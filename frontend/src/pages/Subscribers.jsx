@@ -162,16 +162,37 @@ export default function Subscribers({ onTriggerCycle }) {
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Subscribers &amp; Wallets</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Billing cycles start on subscriber join anniversary date. Track customer advance vs delayed payments.
+            Automated scheduler runs nightly at 1:00 AM (Asia/Dhaka). You can also run the cycle check manually at any time.
           </p>
         </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Subscriber</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={async () => {
+              if (confirm('Run billing cycle check now for all due subscribers in this workspace?')) {
+                try {
+                  const res = await apiClient.post('/billing/run-cycle');
+                  alert(res.message + ` (${res.processedSubscribers || 0} subscriber(s) processed)`);
+                  loadData();
+                  if (onTriggerCycle) onTriggerCycle();
+                } catch (err) {
+                  alert('Failed to run billing cycle: ' + err.message);
+                }
+              }
+            }}
+            title="Manually trigger scheduled billing cycle check now"
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-sm transition border border-slate-200 dark:border-slate-700"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            <span>Run Cycle Now</span>
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Subscriber</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search */}
