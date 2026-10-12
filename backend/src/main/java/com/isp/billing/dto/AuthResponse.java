@@ -4,6 +4,7 @@ import com.isp.billing.entity.Role;
 
 public class AuthResponse {
     private String token;
+    private String refreshToken;
     private Long id;
     private String username;
     private String fullName;
@@ -14,8 +15,9 @@ public class AuthResponse {
 
     public AuthResponse() {}
 
-    public AuthResponse(String token, Long id, String username, String fullName, Role role, Long resellerId, String resellerName, String resellerCode) {
+    public AuthResponse(String token, String refreshToken, Long id, String username, String fullName, Role role, Long resellerId, String resellerName, String resellerCode) {
         this.token = token;
+        this.refreshToken = refreshToken;
         this.id = id;
         this.username = username;
         this.fullName = fullName;
@@ -27,6 +29,9 @@ public class AuthResponse {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

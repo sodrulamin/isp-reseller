@@ -27,6 +27,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await apiClient.post('/auth/login', { username, password });
       localStorage.setItem('isp_auth_token', data.token);
+      if (data.refreshToken) {
+        localStorage.setItem('isp_refresh_token', data.refreshToken);
+      }
       localStorage.setItem('isp_auth_user', JSON.stringify(data));
       setUser(data);
       if (data.resellerId) {
@@ -44,6 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('isp_auth_token');
+    localStorage.removeItem('isp_refresh_token');
     localStorage.removeItem('isp_auth_user');
     localStorage.removeItem('isp_active_workspace_id');
     setUser(null);

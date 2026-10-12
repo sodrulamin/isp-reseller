@@ -39,9 +39,11 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             String jwt = jwtUtils.generateJwtToken(userDetails);
+            String refreshToken = jwtUtils.generateRefreshToken(userDetails);
 
             AuthResponse response = new AuthResponse(
                     jwt,
+                    refreshToken,
                     userDetails.getId(),
                     userDetails.getUsername(),
                     userDetails.getFullName(),
@@ -54,6 +56,35 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid username or password: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        if (refreshToken == null || !jwtUtils.validateRefreshToken(refreshToken)) {
+            return ResponseEntity.status(401).body(Map.of("message", "Invalid or expired refresh token"));
+        }
+
+        try {
+            String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+
+            if (!user.isActive()) {
+                return ResponseEntity.status(401).body(Map.of("message", "User account is inactive"));
+            }
+
+            CustomUserDetails userDetails = new CustomUserDetails(user);
+            String newAccessToken = jwtUtils.generateJwtToken(userDetails);
+            String newRefreshToken = jwtUtils.generateRefreshToken(userDetails);
+
+            return ResponseEntity.ok(Map.of(
+                    "token", newAccessToken,
+                    "refreshToken", newRefreshToken
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", "Failed to refresh token: " + e.getMessage()));
         }
     }
 
