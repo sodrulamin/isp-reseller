@@ -38,7 +38,7 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl">
           {error && (
             <div className="mb-5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-3 text-rose-300 text-xs">
               <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
@@ -96,7 +96,7 @@ export default function Login() {
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
               Quick One-Click Demo Logins:
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleDemoFill('reseller_apex', 'Password@123')}

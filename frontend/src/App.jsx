@@ -51,6 +51,7 @@ export default function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('isp_sidebar_collapsed') === 'true';
   });
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Keep state in sync when user clicks browser back/forward buttons
   React.useEffect(() => {
@@ -63,6 +64,7 @@ export default function App() {
 
   const handleTabChange = (tabId) => {
     setCurrentTab(tabId);
+    setIsMobileSidebarOpen(false);
     const targetPath = TAB_TO_PATH[tabId] || '/dashboard';
     if (window.location.pathname !== targetPath) {
       window.history.pushState({ tab: tabId }, '', targetPath);
@@ -77,22 +79,32 @@ export default function App() {
     });
   };
 
+  const toggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(prev => !prev);
+  };
+
   if (!user) {
     return <Login />;
   }
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors overflow-hidden">
-      <Navbar onToggleSidebar={toggleSidebar} isSidebarCollapsed={isSidebarCollapsed} />
+      <Navbar
+        onToggleSidebar={toggleSidebar}
+        onToggleMobileSidebar={toggleMobileSidebar}
+        isSidebarCollapsed={isSidebarCollapsed}
+      />
 
       <div className="flex flex-1 w-full overflow-hidden">
         <Sidebar
           currentTab={currentTab}
           onSelectTab={handleTabChange}
           isCollapsed={isSidebarCollapsed}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
           {currentTab === 'dashboard' && <Dashboard key={cycleKey} onNavigate={handleTabChange} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
           {currentTab === 'invoices' && <Invoices key={cycleKey} />}

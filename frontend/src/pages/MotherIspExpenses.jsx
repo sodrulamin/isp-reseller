@@ -52,7 +52,7 @@ export default function MotherIspExpenses() {
       </div>
 
       {/* Summary KPI Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">My Mother ISP Balance</span>
           <h3 className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">৳{motherIspBalance.toFixed(2)}</h3>

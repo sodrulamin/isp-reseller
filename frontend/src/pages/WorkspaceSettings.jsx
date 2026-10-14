@@ -70,7 +70,7 @@ export default function WorkspaceSettings({ onUpdate }) {
           </h4>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Company / Reseller Name</label>
             <input
@@ -92,7 +92,7 @@ export default function WorkspaceSettings({ onUpdate }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Contact Person</label>
             <input
@@ -122,7 +122,7 @@ export default function WorkspaceSettings({ onUpdate }) {
             Defines the percentage disbursed to Mother ISP when a subscriber billing cycle renews.
           </p>
 
-          <div className="grid grid-cols-2 gap-4 bg-indigo-50/50 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-indigo-50/50 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mother ISP Provider</label>
               <input

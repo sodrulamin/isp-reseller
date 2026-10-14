@@ -238,7 +238,7 @@ export default function EquipmentExpenses() {
         maxWidth="max-w-xl"
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Equipment / Item Name *</label>
               <input
@@ -267,7 +267,7 @@ export default function EquipmentExpenses() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Serial Number / Asset Tag</label>
               <input
@@ -335,7 +335,7 @@ export default function EquipmentExpenses() {
                 </div>
 
                 {formData.billedToSubscriber && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block font-medium text-slate-600 dark:text-slate-400 mb-1">Customer Billed Amount (৳)</label>
                       <input

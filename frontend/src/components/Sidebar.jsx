@@ -10,10 +10,11 @@ import {
   Receipt,
   Settings,
   Building2,
-  LogOut
+  LogOut,
+  X
 } from 'lucide-react';
 
-export default function Sidebar({ currentTab, onSelectTab, isCollapsed }) {
+export default function Sidebar({ currentTab, onSelectTab, isCollapsed, isMobileOpen, onCloseMobile }) {
   const { user, isSuperAdmin, logout } = useAuth();
 
   const menuItems = [
@@ -29,27 +30,57 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed }) {
   ];
 
   return (
-    <aside
-      className={`${
-        isCollapsed ? 'w-20' : 'w-72'
-      } bg-slate-900 dark:bg-slate-950 text-slate-300 flex flex-col flex-shrink-0 h-full overflow-hidden border-r border-transparent dark:border-slate-800/80 transition-all duration-300 ease-in-out select-none relative`}
-    >
-      <div className="p-3 flex-1 overflow-y-auto overflow-x-hidden pt-4">
-        <nav className="space-y-1.5">
-          {menuItems.map(item => {
-            if (item.role === 'SUPER_ADMIN' && !isSuperAdmin) return null;
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {isMobileOpen && (
+        <div
+          onClick={onCloseMobile}
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-30 lg:hidden animate-in fade-in duration-200"
+          aria-hidden="true"
+        />
+      )}
 
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 lg:static lg:z-auto ${
+          isCollapsed ? 'lg:w-20' : 'lg:w-72'
+        } w-72 bg-slate-900 dark:bg-slate-950 text-slate-300 flex flex-col flex-shrink-0 h-full overflow-hidden border-r border-transparent dark:border-slate-800/80 transition-all duration-300 ease-in-out select-none shadow-2xl lg:shadow-none ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        {/* Mobile Header with Close Button */}
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800/80 lg:hidden">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
+              ISP
+            </div>
+            <span className="font-bold text-white text-base">Navigation</span>
+          </div>
+          <button
+            onClick={onCloseMobile}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            aria-label="Close navigation menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-            return (
-              <a
-                key={item.id}
-                href={item.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onSelectTab(item.id);
-                }}
+        <div className="p-3 flex-1 overflow-y-auto overflow-x-hidden pt-4">
+          <nav className="space-y-1.5">
+            {menuItems.map(item => {
+              if (item.role === 'SUPER_ADMIN' && !isSuperAdmin) return null;
+
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
+
+              return (
+                <a
+                  key={item.id}
+                  href={item.path}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onSelectTab(item.id);
+                    onCloseMobile?.();
+                  }}
                 title={isCollapsed ? item.label : undefined}
                 className={`w-full flex items-center ${
                   isCollapsed ? 'justify-center px-2 py-3' : 'gap-3.5 px-3.5 py-3'
@@ -106,5 +137,6 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed }) {
         )}
       </div>
     </aside>
+    </>
   );
 }

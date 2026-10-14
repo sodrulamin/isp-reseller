@@ -270,7 +270,7 @@ export default function Subscribers({ onTriggerCycle }) {
             Automated scheduler runs nightly at 1:00 AM (Asia/Dhaka). You can also run the cycle check manually at any time.
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <button
             onClick={async () => {
               if (confirm('Run billing cycle check now for all due subscribers in this workspace?')) {
@@ -491,7 +491,7 @@ export default function Subscribers({ onTriggerCycle }) {
         maxWidth="max-w-xl"
       >
         <form onSubmit={handleCreateSubscriber} className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscriber Full Name *</label>
               <input
@@ -516,7 +516,7 @@ export default function Subscribers({ onTriggerCycle }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email (Optional)</label>
               <input
@@ -545,7 +545,7 @@ export default function Subscribers({ onTriggerCycle }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Join Date (Billing Cycle Start) *
@@ -579,7 +579,7 @@ export default function Subscribers({ onTriggerCycle }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username *</label>
               <input
@@ -642,7 +642,7 @@ export default function Subscribers({ onTriggerCycle }) {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
           {/* Quick Info Banner */}
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
               <span className="text-slate-500 dark:text-slate-400">Current Balance:</span>{' '}
               <span className={`font-bold ${
@@ -654,7 +654,7 @@ export default function Subscribers({ onTriggerCycle }) {
               <span className="text-slate-500 dark:text-slate-400">Current Plan:</span>{' '}
               <span className="font-semibold text-slate-900 dark:text-white">{selectedSub?.packageName} (৳{selectedSub?.packagePrice}/mo)</span>
             </div>
-            <div className="text-right flex items-center gap-3">
+            <div className="text-left sm:text-right flex items-center gap-3">
               <div>
                 <span className="text-slate-500 dark:text-slate-400 text-[11px] block">PPPoE User:</span>
                 <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">{selectedSub?.pppoeUsername || '—'}</span>
@@ -672,7 +672,7 @@ export default function Subscribers({ onTriggerCycle }) {
               <Users className="w-3.5 h-3.5 text-blue-500" />
               <span>Personal &amp; Contact Details</span>
             </h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscriber Full Name *</label>
                 <input
@@ -695,7 +695,7 @@ export default function Subscribers({ onTriggerCycle }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address (Optional)</label>
                 <input
@@ -735,7 +735,7 @@ export default function Subscribers({ onTriggerCycle }) {
               <Calendar className="w-3.5 h-3.5 text-indigo-500" />
               <span>Plan &amp; Billing Cycle Settings</span>
             </h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Internet Package *</label>
                 <select
@@ -766,7 +766,7 @@ export default function Subscribers({ onTriggerCycle }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Join Date</label>
                 <input
@@ -834,7 +834,7 @@ export default function Subscribers({ onTriggerCycle }) {
               <CreditCard className="w-3.5 h-3.5 text-emerald-500" />
               <span>PPPoE Credentials &amp; Network</span>
             </h4>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">PPPoE Username *</label>
                 <input
@@ -929,7 +929,7 @@ export default function Subscribers({ onTriggerCycle }) {
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Payment Collected Through *
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <label className={`flex flex-col p-3 rounded-xl border cursor-pointer transition-all ${
                 depositData.paymentChannel === 'DIRECT_RESELLER'
                   ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 shadow-sm'
@@ -998,7 +998,7 @@ export default function Subscribers({ onTriggerCycle }) {
             />
             {/* Quick amount shortcuts */}
             {selectedSub?.packagePrice && (
-              <div className="flex items-center gap-1.5 mt-2">
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
                 <span className="text-[10px] text-slate-400">Quick Fill:</span>
                 <button
                   type="button"
@@ -1045,7 +1045,7 @@ export default function Subscribers({ onTriggerCycle }) {
             </label>
 
             {depositData.updateBillingCycle && (
-              <div className="pt-2 border-t border-blue-100 dark:border-blue-900/40 grid grid-cols-2 gap-3">
+              <div className="pt-2 border-t border-blue-100 dark:border-blue-900/40 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 text-[11px] mb-1">
                     Cycle Start Date *
@@ -1093,7 +1093,7 @@ export default function Subscribers({ onTriggerCycle }) {
                   Rate: {selectedSub?.effectiveMotherIspRate || 49}% / {100 - Number(selectedSub?.effectiveMotherIspRate || 49)}%
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
                 <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
                   <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-semibold">Mother ISP Keeps ({selectedSub?.effectiveMotherIspRate || 49}%)</span>
                   <span className="font-extrabold text-rose-600 dark:text-rose-400 text-sm">
@@ -1113,7 +1113,7 @@ export default function Subscribers({ onTriggerCycle }) {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
               <select
@@ -1189,80 +1189,82 @@ export default function Subscribers({ onTriggerCycle }) {
         maxWidth="max-w-2xl"
       >
         <div className="space-y-3 text-xs">
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
               <span className="font-semibold text-slate-900 dark:text-white">{selectedSub?.name}</span> ({selectedSub?.subscriberCode})
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Plan: {selectedSub?.packageName} • PPPoE: <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{selectedSub?.pppoeUsername}</span>
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <span className="text-slate-500 dark:text-slate-400 text-[11px]">Current Balance</span>
               <div className="font-bold text-base text-slate-900 dark:text-white">৳{Number(selectedSub?.walletBalance || 0).toFixed(2)}</div>
             </div>
           </div>
 
           <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-72 overflow-y-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold text-[11px]">
-                <tr>
-                  <th className="py-2 px-3">Date</th>
-                  <th className="py-2 px-3">Type</th>
-                  <th className="py-2 px-3">Amount</th>
-                  <th className="py-2 px-3">Balance After</th>
-                  <th className="py-2 px-3">Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {subLedger.length === 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold text-[11px]">
                   <tr>
-                    <td colSpan="5" className="py-6 text-center text-slate-400 dark:text-slate-500">No transactions yet</td>
+                    <th className="py-2 px-3">Date</th>
+                    <th className="py-2 px-3">Type</th>
+                    <th className="py-2 px-3">Amount</th>
+                    <th className="py-2 px-3">Balance After</th>
+                    <th className="py-2 px-3">Details</th>
                   </tr>
-                ) : (
-                  subLedger.map(tx => (
-                    <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-850">
-                      <td className="py-2 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                        {tx.transactionDate?.replace('T', ' ').substring(0, 16)}
-                      </td>
-                      <td className="py-2 px-3 font-semibold">
-                        {tx.transactionType === 'DEPOSIT' ? (
-                          <span className="text-emerald-600 dark:text-emerald-400">DEPOSIT</span>
-                        ) : tx.transactionType === 'MONTHLY_PACKAGE_DEDUCTION' ? (
-                          <span className="text-rose-600 dark:text-rose-400">FEE DEDUCTION</span>
-                        ) : (
-                          <span className="text-amber-600 dark:text-amber-400">{tx.transactionType}</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-200">
-                        {tx.transactionType === 'DEPOSIT' ? `+৳${tx.amount}` : `-৳${tx.amount}`}
-                      </td>
-                      <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-300">
-                        ৳{tx.balanceAfter}
-                      </td>
-                      <td className="py-2 px-3 text-slate-500 dark:text-slate-400 text-[11px]">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {tx.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                              Mother ISP Portal
-                            </span>
-                          ) : tx.transactionType === 'DEPOSIT' ? (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                              Direct ({tx.paymentMethod})
-                            </span>
-                          ) : null}
-                          <span>{tx.notes}</span>
-                        </div>
-                        {tx.paymentChannel === 'MOTHER_ISP_PORTAL' && Number(tx.resellerCreditedAmount || 0) > 0 && (
-                          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
-                            Mother ISP took: ৳{tx.motherIspRetainedAmount} | Credited to your balance: ৳{tx.resellerCreditedAmount}
-                          </div>
-                        )}
-                      </td>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {subLedger.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="py-6 text-center text-slate-400 dark:text-slate-500">No transactions yet</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    subLedger.map(tx => (
+                      <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-850">
+                        <td className="py-2 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                          {tx.transactionDate?.replace('T', ' ').substring(0, 16)}
+                        </td>
+                        <td className="py-2 px-3 font-semibold">
+                          {tx.transactionType === 'DEPOSIT' ? (
+                            <span className="text-emerald-600 dark:text-emerald-400">DEPOSIT</span>
+                          ) : tx.transactionType === 'MONTHLY_PACKAGE_DEDUCTION' ? (
+                            <span className="text-rose-600 dark:text-rose-400">FEE DEDUCTION</span>
+                          ) : (
+                            <span className="text-amber-600 dark:text-amber-400">{tx.transactionType}</span>
+                          )}
+                        </td>
+                        <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-200">
+                          {tx.transactionType === 'DEPOSIT' ? `+৳${tx.amount}` : `-৳${tx.amount}`}
+                        </td>
+                        <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-300">
+                          ৳{tx.balanceAfter}
+                        </td>
+                        <td className="py-2 px-3 text-slate-500 dark:text-slate-400 text-[11px]">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {tx.paymentChannel === 'MOTHER_ISP_PORTAL' ? (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                Mother ISP Portal
+                              </span>
+                            ) : tx.transactionType === 'DEPOSIT' ? (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                Direct ({tx.paymentMethod})
+                              </span>
+                            ) : null}
+                            <span>{tx.notes}</span>
+                          </div>
+                          {tx.paymentChannel === 'MOTHER_ISP_PORTAL' && Number(tx.resellerCreditedAmount || 0) > 0 && (
+                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
+                              Mother ISP took: ৳{tx.motherIspRetainedAmount} | Credited to your balance: ৳{tx.resellerCreditedAmount}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </Modal>

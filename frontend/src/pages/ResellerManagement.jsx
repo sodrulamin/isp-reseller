@@ -174,7 +174,7 @@ export default function ResellerManagement() {
         maxWidth="max-w-xl"
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Company / Reseller Name *</label>
               <input
@@ -199,7 +199,7 @@ export default function ResellerManagement() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mother ISP Provider Name</label>
               <input
@@ -227,7 +227,7 @@ export default function ResellerManagement() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Contact Person</label>
               <input
@@ -252,7 +252,7 @@ export default function ResellerManagement() {
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
             <h5 className="font-semibold text-slate-800 dark:text-slate-200">Workspace Administrator Account</h5>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-medium text-slate-600 dark:text-slate-400 mb-1">Admin Username *</label>
                 <input
