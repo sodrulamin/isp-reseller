@@ -107,7 +107,7 @@ export default function App() {
         <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
           {currentTab === 'dashboard' && <Dashboard key={cycleKey} onNavigate={handleTabChange} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
-          {currentTab === 'invoices' && <Invoices key={cycleKey} />}
+          {currentTab === 'invoices' && <Invoices key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}
           {currentTab === 'equipment' && <EquipmentExpenses key={cycleKey} />}
           {currentTab === 'packages' && <Packages key={cycleKey} />}

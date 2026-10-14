@@ -13,10 +13,11 @@ import {
   CreditCard,
   Tag,
   ArrowRight,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 
-export default function Invoices() {
+export default function Invoices({ onTriggerCycle }) {
   const { activeWorkspaceId } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -126,8 +127,29 @@ export default function Invoices() {
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Subscriber Billing Invoices</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Generated automatically when subscriber monthly billing cycles renew. Approve and settle outstanding due bills here.
+            Automated scheduler runs nightly at 1:00 AM (Asia/Dhaka). You can also run the cycle check manually at any time.
           </p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={async () => {
+              if (confirm('Run billing cycle check now for all due subscribers in this workspace?')) {
+                try {
+                  const res = await apiClient.post('/billing/run-cycle');
+                  alert(res.message + ` (${res.processedSubscribers || 0} subscriber(s) processed)`);
+                  loadInvoices();
+                  if (onTriggerCycle) onTriggerCycle();
+                } catch (err) {
+                  alert('Failed to run billing cycle: ' + err.message);
+                }
+              }
+            }}
+            title="Manually trigger scheduled billing cycle check now"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-sm transition border border-slate-200 dark:border-slate-700"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            <span>Run Cycle Now</span>
+          </button>
         </div>
       </div>
 
