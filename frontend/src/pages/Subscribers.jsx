@@ -180,6 +180,26 @@ export default function Subscribers({ onTriggerCycle }) {
     }
   };
 
+  const handleEnableSubscriber = async () => {
+    if (!selectedSub) return;
+    try {
+      await apiClient.put(`/subscribers/${selectedSub.id}`, {
+        ...editFormData,
+        status: 'ACTIVE',
+        pppoeUsername: editFormData.pppoeUsername ? editFormData.pppoeUsername.trim() : selectedSub.pppoeUsername,
+        packageId: Number(editFormData.packageId || selectedSub.packageId),
+        billingCycleDay: editFormData.billingCycleDay ? Number(editFormData.billingCycleDay) : null,
+        nextBillingDate: editFormData.nextBillingDate || null,
+        motherIspRateOverride: editFormData.motherIspRateOverride !== '' && editFormData.motherIspRateOverride !== null ? Number(editFormData.motherIspRateOverride) : null
+      });
+      setIsEditModalOpen(false);
+      loadData();
+      if (onTriggerCycle) onTriggerCycle();
+    } catch (err) {
+      alert(err.message || 'Failed to enable subscriber');
+    }
+  };
+
   const handleOpenDeposit = (sub) => {
     setSelectedSub(sub);
     const today = new Date().toISOString().substring(0, 10);
@@ -648,38 +668,6 @@ export default function Subscribers({ onTriggerCycle }) {
             </div>
           </div>
 
-          {/* Suspended Alert & One-Click Reactivate */}
-          {selectedSub?.status === 'SUSPENDED' && (
-            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                <div>
-                  <div className="font-bold text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2">
-                    <span>Subscriber is currently SUSPENDED</span>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200">
-                      On Hold
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
-                    This account is currently on temporary hold. Reactivating will restore active status and renew cycle billing.
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditFormData({ ...editFormData, status: 'ACTIVE' })}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm whitespace-nowrap self-start sm:self-auto ${
-                  editFormData.status === 'ACTIVE'
-                    ? 'bg-emerald-600 text-white shadow-emerald-500/20'
-                    : 'bg-amber-600 hover:bg-amber-700 text-white'
-                }`}
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{editFormData.status === 'ACTIVE' ? 'Set to ACTIVE ✓' : 'Reactivate to ACTIVE'}</span>
-              </button>
-            </div>
-          )}
-
           {/* Section: Profile & Contact */}
           <div className="p-3 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
             <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
@@ -777,12 +765,6 @@ export default function Subscribers({ onTriggerCycle }) {
                   <option value="SUSPENDED">SUSPENDED (Temporary Hold)</option>
                   <option value="INACTIVE">INACTIVE (Disconnected)</option>
                 </select>
-                {selectedSub?.status === 'SUSPENDED' && editFormData.status === 'ACTIVE' && (
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>Will reactivate account and renew cycle billing upon saving</span>
-                  </p>
-                )}
               </div>
             </div>
 
@@ -901,7 +883,18 @@ export default function Subscribers({ onTriggerCycle }) {
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end items-center gap-2">
+            {selectedSub?.status === 'SUSPENDED' && (
+              <button
+                type="button"
+                onClick={handleEnableSubscriber}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
+                title="Enable and reactivate this suspended subscriber"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Enable</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
@@ -911,20 +904,9 @@ export default function Subscribers({ onTriggerCycle }) {
             </button>
             <button
               type="submit"
-              className={`px-4 py-2 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5 ${
-                selectedSub?.status === 'SUSPENDED' && editFormData.status === 'ACTIVE'
-                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm transition"
             >
-              {selectedSub?.status === 'SUSPENDED' && editFormData.status === 'ACTIVE' ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Reactivate &amp; Save Changes</span>
-                </>
-              ) : (
-                <span>Update Subscriber Details</span>
-              )}
+              Update Subscriber Details
             </button>
           </div>
         </form>
