@@ -19,15 +19,15 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed, onToggle
   const { user, isSuperAdmin, logout } = useAuth();
 
   const menuItems = [
-    { id: 'dashboard', label: 'Financial Dashboard', icon: LayoutDashboard, role: 'ALL' },
-    { id: 'subscribers', label: 'Subscribers & Wallets', icon: Users, role: 'RESELLER' },
-    { id: 'invoices', label: 'Invoices & Billing', icon: Receipt, role: 'RESELLER' },
-    { id: 'mother-isp', label: 'Mother ISP Expenses', icon: Network, role: 'RESELLER' },
-    { id: 'equipment', label: 'Equipment Expenses', icon: Boxes, role: 'RESELLER' },
-    { id: 'packages', label: 'Internet Packages', icon: Package, role: 'RESELLER' },
-    { id: 'services', label: 'Physical Service Tickets', icon: Wrench, role: 'RESELLER' },
-    { id: 'settings', label: 'Workspace Settings', icon: Settings, role: 'RESELLER' },
-    { id: 'resellers', label: 'Reseller Tenants (SaaS)', icon: Building2, role: 'SUPER_ADMIN' },
+    { id: 'dashboard', path: '/dashboard', label: 'Financial Dashboard', icon: LayoutDashboard, role: 'ALL' },
+    { id: 'subscribers', path: '/subscribers', label: 'Subscribers & Wallets', icon: Users, role: 'RESELLER' },
+    { id: 'invoices', path: '/invoices', label: 'Invoices & Billing', icon: Receipt, role: 'RESELLER' },
+    { id: 'mother-isp', path: '/mother-isp', label: 'Mother ISP Expenses', icon: Network, role: 'RESELLER' },
+    { id: 'equipment', path: '/equipment', label: 'Equipment Expenses', icon: Boxes, role: 'RESELLER' },
+    { id: 'packages', path: '/packages', label: 'Internet Packages', icon: Package, role: 'RESELLER' },
+    { id: 'services', path: '/services', label: 'Physical Service Tickets', icon: Wrench, role: 'RESELLER' },
+    { id: 'settings', path: '/settings', label: 'Workspace Settings', icon: Settings, role: 'RESELLER' },
+    { id: 'resellers', path: '/resellers', label: 'Reseller Tenants (SaaS)', icon: Building2, role: 'SUPER_ADMIN' },
   ];
 
   return (
@@ -61,9 +61,13 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed, onToggle
             const isActive = currentTab === item.id;
 
             return (
-              <button
+              <a
                 key={item.id}
-                onClick={() => onSelectTab(item.id)}
+                href={item.path}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelectTab(item.id);
+                }}
                 title={isCollapsed ? item.label : undefined}
                 className={`w-full flex items-center ${
                   isCollapsed ? 'justify-center px-2 py-3' : 'gap-3.5 px-3.5 py-3'
@@ -75,7 +79,7 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed, onToggle
               >
                 <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 {!isCollapsed && <span className="truncate">{item.label}</span>}
-              </button>
+              </a>
             );
           })}
         </nav>

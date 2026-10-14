@@ -14,13 +14,60 @@ import Invoices from './pages/Invoices';
 import ResellerManagement from './pages/ResellerManagement';
 import WorkspaceSettings from './pages/WorkspaceSettings';
 
+const TAB_TO_PATH = {
+  dashboard: '/dashboard',
+  subscribers: '/subscribers',
+  invoices: '/invoices',
+  'mother-isp': '/mother-isp',
+  equipment: '/equipment',
+  packages: '/packages',
+  services: '/services',
+  settings: '/settings',
+  resellers: '/resellers'
+};
+
+const PATH_TO_TAB = {
+  '/dashboard': 'dashboard',
+  '/subscribers': 'subscribers',
+  '/invoices': 'invoices',
+  '/mother-isp': 'mother-isp',
+  '/equipment': 'equipment',
+  '/packages': 'packages',
+  '/services': 'services',
+  '/settings': 'settings',
+  '/resellers': 'resellers'
+};
+
+function getTabFromLocation() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  if (path === '/' || path === '') return 'dashboard';
+  return PATH_TO_TAB[path] || 'dashboard';
+}
+
 export default function App() {
   const { user, isSuperAdmin } = useAuth();
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [currentTab, setCurrentTab] = useState(getTabFromLocation);
   const [cycleKey, setCycleKey] = useState(0);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('isp_sidebar_collapsed') === 'true';
   });
+
+  // Keep state in sync when user clicks browser back/forward buttons
+  React.useEffect(() => {
+    const handlePopState = () => {
+      setCurrentTab(getTabFromLocation());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleTabChange = (tabId) => {
+    setCurrentTab(tabId);
+    const targetPath = TAB_TO_PATH[tabId] || '/dashboard';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ tab: tabId }, '', targetPath);
+    }
+  };
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(prev => {
@@ -41,21 +88,21 @@ export default function App() {
       <div className="flex flex-1 w-full overflow-hidden">
         <Sidebar
           currentTab={currentTab}
-          onSelectTab={setCurrentTab}
+          onSelectTab={handleTabChange}
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={toggleSidebar}
         />
 
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
-          {currentTab === 'dashboard' && <Dashboard key={cycleKey} onNavigate={setCurrentTab} />}
+          {currentTab === 'dashboard' && <Dashboard key={cycleKey} onNavigate={handleTabChange} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
+          {currentTab === 'invoices' && <Invoices key={cycleKey} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}
           {currentTab === 'equipment' && <EquipmentExpenses key={cycleKey} />}
-          {currentTab === 'services' && <ServiceTickets key={cycleKey} />}
           {currentTab === 'packages' && <Packages key={cycleKey} />}
-          {currentTab === 'invoices' && <Invoices key={cycleKey} />}
-          {currentTab === 'resellers' && isSuperAdmin && <ResellerManagement key={cycleKey} />}
+          {currentTab === 'services' && <ServiceTickets key={cycleKey} />}
           {currentTab === 'settings' && <WorkspaceSettings onUpdate={() => setCycleKey(k => k + 1)} />}
+          {currentTab === 'resellers' && isSuperAdmin && <ResellerManagement key={cycleKey} />}
         </main>
       </div>
     </div>
