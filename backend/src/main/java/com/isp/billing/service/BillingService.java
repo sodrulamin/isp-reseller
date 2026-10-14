@@ -54,13 +54,14 @@ public class BillingService {
         log.info("Executing scheduled billing cycle check for active subscribers...");
         LocalDate today = LocalDate.now();
         List<Subscriber> dueSubscribers = subscriberRepository.findSubscribersDueForRenewal(today);
-        log.info("Found {} subscribers due for billing cycle renewal", dueSubscribers.size());
+        log.info("Found {} active subscribers with next billing date in the past or due today", dueSubscribers.size());
 
         int processed = 0;
         for (Subscriber sub : dueSubscribers) {
             try {
-                processMonthlyCycleRenewal(sub, sub.getNextBillingDate());
-                processed++;
+                if (processMonthlyCycleRenewal(sub, sub.getNextBillingDate())) {
+                    processed++;
+                }
             } catch (Exception e) {
                 log.error("Failed to process billing cycle for subscriber {}: {}", sub.getSubscriberCode(), e.getMessage());
             }
@@ -76,10 +77,17 @@ public class BillingService {
     public int runOnDemandBillingCycle(Long resellerId) {
         LocalDate today = LocalDate.now();
         List<Subscriber> dueSubscribers = subscriberRepository.findSubscribersDueForRenewalByReseller(resellerId, today);
+        int processed = 0;
         for (Subscriber sub : dueSubscribers) {
-            processMonthlyCycleRenewal(sub, sub.getNextBillingDate());
+            try {
+                if (processMonthlyCycleRenewal(sub, sub.getNextBillingDate())) {
+                    processed++;
+                }
+            } catch (Exception e) {
+                log.error("Failed to process billing cycle for subscriber {}: {}", sub.getSubscriberCode(), e.getMessage());
+            }
         }
-        return dueSubscribers.size();
+        return processed;
     }
 
     /**
@@ -97,14 +105,34 @@ public class BillingService {
 
     /**
      * Core monthly billing renewal algorithm:
-     * 1. Subscriber wallet is debited by package price.
-     * 2. An invoice is generated for this billing cycle.
-     * 3. IF covered in full by advance balance: invoice is PAID, subscriber is ACTIVE, and Mother ISP payout is recorded.
-     * 4. IF NOT covered (due): invoice is DUE/PARTIAL, subscriber is SUSPENDED, and NO disbursement to Mother ISP occurs.
-     * 5. Billing cycle period start and next billing date are advanced by 1 month.
+     * When bill cycle is run:
+     * 1. Check next billing date for the users.
+     * 2. If any user is found whose next billing date is in the past (or due today) and no bill is found for running month, create a new bill for those customers.
+     * 3. Set next billing date to next month with today's date (cycle day updated to today's day of month).
+     * 4. If the user is not active, skip it.
      */
     @Transactional
-    public void processMonthlyCycleRenewal(Subscriber subscriber, LocalDate cycleDate) {
+    public boolean processMonthlyCycleRenewal(Subscriber subscriber, LocalDate cycleDate) {
+        // 4. If the user is not active, skip it.
+        if (subscriber.getStatus() != SubscriberStatus.ACTIVE) {
+            log.info("Skipping subscriber {} because status is {}", subscriber.getSubscriberCode(), subscriber.getStatus());
+            return false;
+        }
+
+        LocalDate today = LocalDate.now();
+
+        // 1 & 2. Check if a bill is already found for the running month (same year & month as today)
+        LocalDate monthStart = today.withDayOfMonth(1);
+        LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+        boolean billExistsThisMonth = invoiceRepository.existsBySubscriberIdAndInvoiceDateBetween(subscriber.getId(), monthStart, monthEnd)
+                || invoiceRepository.existsBySubscriberIdAndBillingPeriodStartBetween(subscriber.getId(), monthStart, monthEnd);
+
+        if (billExistsThisMonth) {
+            log.info("Skipping subscriber {} as a bill is already generated for running month ({}-{})",
+                    subscriber.getSubscriberCode(), today.getYear(), today.getMonthValue());
+            return false;
+        }
+
         Reseller reseller = subscriber.getReseller();
         InternetPackage pkg = subscriber.getInternetPackage();
         BigDecimal packagePrice = pkg.getMonthlyPrice();
@@ -114,6 +142,12 @@ public class BillingService {
         BigDecimal balanceAfter = balanceBefore.subtract(packagePrice);
         subscriber.setWalletBalance(balanceAfter);
 
+        // Calculate next billing date: next month with today's date
+        int todayDay = today.getDayOfMonth();
+        LocalDate nextCycleMonth = today.plusMonths(1);
+        int targetDay = Math.min(todayDay, nextCycleMonth.lengthOfMonth());
+        LocalDate nextCycle = nextCycleMonth.withDayOfMonth(targetDay);
+
         SubscriberWalletTransaction deductionTx = new SubscriberWalletTransaction(
                 reseller,
                 subscriber,
@@ -122,20 +156,20 @@ public class BillingService {
                 balanceBefore,
                 balanceAfter,
                 "WALLET_BALANCE",
-                "FEE-" + cycleDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId(),
-                "Monthly package fee for " + pkg.getName() + " (" + cycleDate + " to " + cycleDate.plusMonths(1).minusDays(1) + ")"
+                "FEE-" + today.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId(),
+                "Monthly package fee for " + pkg.getName() + " (" + today + " to " + nextCycle.minusDays(1) + ")"
         );
         walletTransactionRepository.save(deductionTx);
 
-        // 2. Create Invoice
+        // 2. Create Invoice for running month
         Invoice invoice = new Invoice();
         invoice.setReseller(reseller);
         invoice.setSubscriber(subscriber);
-        invoice.setInvoiceNumber("INV-" + cycleDate.format(DateTimeFormatter.ofPattern("yyyyMM")) + "-" + subscriber.getSubscriberCode());
-        invoice.setInvoiceDate(cycleDate);
-        invoice.setDueDate(cycleDate.plusDays(7));
-        invoice.setBillingPeriodStart(cycleDate);
-        invoice.setBillingPeriodEnd(cycleDate.plusMonths(1).minusDays(1));
+        invoice.setInvoiceNumber("INV-" + today.format(DateTimeFormatter.ofPattern("yyyyMM")) + "-" + subscriber.getSubscriberCode());
+        invoice.setInvoiceDate(today);
+        invoice.setDueDate(today.plusDays(7));
+        invoice.setBillingPeriodStart(today);
+        invoice.setBillingPeriodEnd(nextCycle.minusDays(1));
         invoice.setPackageAmount(packagePrice);
         invoice.setEquipmentAmount(BigDecimal.ZERO);
         invoice.setTotalAmount(packagePrice);
@@ -169,18 +203,16 @@ public class BillingService {
         invoice.setMotherIspDisbursed(false);
         invoiceRepository.save(invoice);
 
-        // 3. Advance billing dates to next month
-        subscriber.setCurrentBillingPeriodStart(cycleDate);
-        LocalDate nextCycle = cycleDate.plusMonths(1);
-        // Adjust for day of month (e.g. 31st -> 28th/30th)
-        int targetDay = Math.min(subscriber.getBillingCycleDay(), nextCycle.lengthOfMonth());
-        nextCycle = nextCycle.withDayOfMonth(targetDay);
-        subscriber.setNextBillingDate(nextCycle);
+        // 3. Set next billing date to next month with today's date (update the cycle date)
+        subscriber.setBillingCycleDay(todayDay);
+        subscriber.setCurrentBillingPeriodStart(today);
         subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
+        subscriber.setNextBillingDate(nextCycle);
 
         subscriberRepository.save(subscriber);
-        log.info("Successfully processed cycle for subscriber {} (status: {}, next cycle: {})", 
+        log.info("Successfully processed cycle for subscriber {} (status: {}, next billing date: {})", 
                 subscriber.getSubscriberCode(), subscriber.getStatus(), nextCycle);
+        return true;
     }
 
     /**
