@@ -883,7 +883,7 @@ export default function Subscribers({ onTriggerCycle }) {
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end items-center gap-2">
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
@@ -891,25 +891,23 @@ export default function Subscribers({ onTriggerCycle }) {
             >
               Cancel
             </button>
-            <div className="flex items-center gap-2">
-              {selectedSub?.status === 'SUSPENDED' && (
-                <button
-                  type="button"
-                  onClick={handleEnableSubscriber}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
-                  title="Enable and reactivate this suspended subscriber"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Enable</span>
-                </button>
-              )}
+            {selectedSub?.status === 'SUSPENDED' && (
               <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm transition"
+                type="button"
+                onClick={handleEnableSubscriber}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm transition flex items-center gap-1.5"
+                title="Enable and reactivate this suspended subscriber"
               >
-                Update
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Enable</span>
               </button>
-            </div>
+            )}
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm transition"
+            >
+              Update
+            </button>
           </div>
         </form>
       </Modal>
