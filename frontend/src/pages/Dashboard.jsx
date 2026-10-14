@@ -158,10 +158,10 @@ export default function Dashboard({ onNavigate }) {
 
       {/* Hero KPI Cards: 4 Flagship Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {/* 1. Total Subscriber */}
+        {/* 1. Total User Count */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Subscribers</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total User Count</span>
             <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
               <Users className="w-4 h-4" />
             </div>
@@ -170,61 +170,111 @@ export default function Dashboard({ onNavigate }) {
             <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {totalSubscribers}
             </div>
-            <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <span>Active: <strong className="text-emerald-600 dark:text-emerald-400">{activeSubscribers}</strong></span>
+            <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Active: <strong className="text-emerald-600 dark:text-emerald-400">{activeSubscribers}</strong></span>
+              </span>
               <span>•</span>
-              <span>Inactive: <strong className="text-rose-500">{totalSubscribers - activeSubscribers}</strong></span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>Suspended: <strong className="text-amber-600 dark:text-amber-400">{totalSubscribers - activeSubscribers}</strong></span>
+              </span>
             </div>
           </div>
         </div>
 
-        {/* 2. Collected by mother ISP. (Customer paid themselves) */}
+        {/* 2. Total Revenue (Collected By Mother ISP + Collected By Me) */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Mother ISP Collections</span>
-            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50">
-              <Network className="w-4 h-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Revenue</span>
+            <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
+              <DollarSign className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight">৳{portalRev.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-normal">
-              <span className="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold text-[10px]">Portal</span>
-              <span>Customer paid themselves</span>
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              ৳{totalRev.toFixed(2)}
+            </div>
+            <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                  <span>Collected by Mother ISP:</span>
+                </span>
+                <strong className="text-indigo-600 dark:text-indigo-400 font-bold text-[11px]">৳{portalRev.toFixed(2)}</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span>Collected by Me:</span>
+                </span>
+                <strong className="text-blue-600 dark:text-blue-400 font-bold text-[11px]">৳{directRev.toFixed(2)}</strong>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 3. Collected by me. Manually. */}
+        {/* 3. Total Expenses (Disbursement to Mother isp + Other expenses) */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Collected by Me</span>
-            <div className="p-2 rounded-lg bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-900/50">
-              <Wallet className="w-4 h-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Expenses</span>
+            <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50">
+              <TrendingDown className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">৳{directRev.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-normal">
-              <span className="px-1.5 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-semibold text-[10px]">Manual</span>
-              <span>Cash in Hand &amp; direct MFS</span>
+            <div className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight">
+              ৳{totalExp.toFixed(2)}
+            </div>
+            <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span>Disbursement to Mother ISP:</span>
+                </span>
+                <strong className="text-rose-600 dark:text-rose-400 font-bold text-[11px]">৳{motherIspExp.toFixed(2)}</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span>Other Expenses:</span>
+                </span>
+                <strong className="text-slate-700 dark:text-slate-300 font-bold text-[11px]">৳{(eqExp + svcExp).toFixed(2)}</strong>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 4. Total profit */}
+        {/* 4. Net Profit (Total Revenue - Total Expenses) */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Profit</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Net Profit</span>
             <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">৳{netProfit.toFixed(2)}</div>
-            <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-semibold">{netMargin.toFixed(1)}% Net Margin</span>
-              <span>After all expenses</span>
+            <div className={`text-2xl font-extrabold tracking-tight ${
+              netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+            }`}>
+              ৳{netProfit.toFixed(2)}
+            </div>
+            <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400">Total Revenue - Total Expenses</span>
+                <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] ${
+                  netProfit >= 0
+                    ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
+                }`}>
+                  {netMargin.toFixed(1)}% Margin
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                <span>৳{totalRev.toFixed(0)} - ৳{totalExp.toFixed(0)}</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Net Retained</span>
+              </div>
             </div>
           </div>
         </div>
