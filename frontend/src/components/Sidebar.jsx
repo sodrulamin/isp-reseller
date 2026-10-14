@@ -21,13 +21,13 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed, onToggle
   const menuItems = [
     { id: 'dashboard', label: 'Financial Dashboard', icon: LayoutDashboard, role: 'ALL' },
     { id: 'subscribers', label: 'Subscribers & Wallets', icon: Users, role: 'RESELLER' },
+    { id: 'invoices', label: 'Invoices & Billing', icon: Receipt, role: 'RESELLER' },
     { id: 'mother-isp', label: 'Mother ISP Expenses', icon: Network, role: 'RESELLER' },
     { id: 'equipment', label: 'Equipment Expenses', icon: Boxes, role: 'RESELLER' },
-    { id: 'services', label: 'Physical Service Tickets', icon: Wrench, role: 'RESELLER' },
     { id: 'packages', label: 'Internet Packages', icon: Package, role: 'RESELLER' },
-    { id: 'invoices', label: 'Invoices & Billing', icon: Receipt, role: 'RESELLER' },
-    { id: 'resellers', label: 'Reseller Tenants (SaaS)', icon: Building2, role: 'SUPER_ADMIN' },
+    { id: 'services', label: 'Physical Service Tickets', icon: Wrench, role: 'RESELLER' },
     { id: 'settings', label: 'Workspace Settings', icon: Settings, role: 'RESELLER' },
+    { id: 'resellers', label: 'Reseller Tenants (SaaS)', icon: Building2, role: 'SUPER_ADMIN' },
   ];
 
   return (
