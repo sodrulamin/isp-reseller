@@ -189,21 +189,29 @@ public class BillingService {
             recordMotherIspPayoutForCycle(reseller, subscriber, today,
                     "Automatic disbursement for advance-paid cycle starting " + today);
         } else if (balanceBefore.compareTo(BigDecimal.ZERO) > 0) {
-            // Partially covered by existing balance -> Remains awaiting manual approval/settlement for remaining due
+            // Partially covered by existing balance -> Created in partial due, Mother ISP disbursed upfront
             invoice.setPaidAmount(balanceBefore);
             invoice.setDueAmount(packagePrice.subtract(balanceBefore));
             invoice.setStatus("PARTIAL");
-            invoice.setMotherIspDisbursed(false);
-            invoice.setNotes("Partially deducted from advance balance. Remaining due: " + invoice.getDueAmount());
-            subscriber.setStatus(SubscriberStatus.SUSPENDED);
+            invoice.setMotherIspDisbursed(true);
+            invoice.setNotes("Partially deducted from advance balance. Remaining due: " + invoice.getDueAmount() + ". Mother ISP disbursed upfront.");
+            subscriber.setStatus(SubscriberStatus.ACTIVE);
+
+            // Record Mother ISP payout upfront even though remaining amount is due
+            recordMotherIspPayoutForCycle(reseller, subscriber, today,
+                    "Disbursement for cycle starting " + today + " (created in partial due)");
         } else {
-            // Unpaid / delayed payment -> Remains awaiting approval/payment
+            // Unpaid / delayed payment -> Created in due, Mother ISP disbursed upfront
             invoice.setPaidAmount(BigDecimal.ZERO);
             invoice.setDueAmount(packagePrice);
             invoice.setStatus("DUE");
-            invoice.setMotherIspDisbursed(false);
-            invoice.setNotes("Delayed payment. Added to subscriber wallet overdue balance.");
-            subscriber.setStatus(SubscriberStatus.SUSPENDED);
+            invoice.setMotherIspDisbursed(true);
+            invoice.setNotes("Delayed payment. Added to subscriber wallet overdue balance. Mother ISP disbursed upfront.");
+            subscriber.setStatus(SubscriberStatus.ACTIVE);
+
+            // Record Mother ISP payout upfront even though created in due
+            recordMotherIspPayoutForCycle(reseller, subscriber, today,
+                    "Disbursement for cycle starting " + today + " (created in due)");
         }
         invoiceRepository.save(invoice);
 
@@ -454,12 +462,13 @@ public class BillingService {
             invoice = invoiceRepository.findById(invoiceId).orElse(invoice);
         }
 
-        // 2. DISBURSE TO MOTHER ISP (Done ONLY when the reseller approves the invoice)
+        // 2. DISBURSE TO MOTHER ISP (if not already disbursed upfront)
         LocalDate cycleDate = invoice.getBillingPeriodStart() != null ? invoice.getBillingPeriodStart() : invoice.getInvoiceDate();
-        recordMotherIspPayoutForCycle(reseller, subscriber, cycleDate, 
-                "Disbursement on approval of invoice " + invoice.getInvoiceNumber());
-
-        invoice.setMotherIspDisbursed(true);
+        if (!invoice.isMotherIspDisbursed()) {
+            recordMotherIspPayoutForCycle(reseller, subscriber, cycleDate, 
+                    "Disbursement on approval of invoice " + invoice.getInvoiceNumber());
+            invoice.setMotherIspDisbursed(true);
+        }
         if (invoice.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
             invoice.setStatus("PAID");
         }
@@ -492,6 +501,7 @@ public class BillingService {
         BigDecimal dueAmount = invoice.getDueAmount();
         Subscriber subscriber = invoice.getSubscriber();
         Reseller reseller = invoice.getReseller();
+        LocalDate cycleStart = invoice.getBillingPeriodStart() != null ? invoice.getBillingPeriodStart() : invoice.getInvoiceDate();
 
         String reason = (req != null && req.getReason() != null && !req.getReason().isBlank())
                 ? req.getReason().trim()
@@ -515,15 +525,36 @@ public class BillingService {
                     "Reversal for rejected due invoice " + invoice.getInvoiceNumber() + ": " + reason
             );
             walletTransactionRepository.save(tx);
-            subscriberRepository.save(subscriber);
         }
+
+        // Undo Mother ISP Disbursement if it was disbursed upfront for this cycle
+        if (invoice.isMotherIspDisbursed() && cycleStart != null) {
+            List<MotherIspPayout> payouts = motherIspPayoutRepository.findBySubscriberIdAndCycleDate(subscriber.getId(), cycleStart);
+            for (MotherIspPayout p : payouts) {
+                motherIspPayoutRepository.delete(p);
+                log.info("Undid Mother ISP payout id {} of ৳{} for subscriber {} on cycle {} due to rejection", 
+                        p.getId(), p.getAmountPaid(), subscriber.getSubscriberCode(), cycleStart);
+            }
+            invoice.setMotherIspDisbursed(false);
+        }
+
+        // Mark user as inactive on rejection
+        subscriber.setStatus(SubscriberStatus.INACTIVE);
+
+        // Reset customer's next billing date to cycleStart of rejected invoice
+        if (cycleStart != null) {
+            subscriber.setNextBillingDate(cycleStart);
+            subscriber.setCurrentBillingPeriodStart(cycleStart);
+        }
+        subscriberRepository.save(subscriber);
 
         invoice.setStatus("REJECTED");
         invoice.setDueAmount(BigDecimal.ZERO);
         invoice.setNotes((invoice.getNotes() != null ? invoice.getNotes() + " | " : "") + "Rejected: " + reason);
         invoice = invoiceRepository.save(invoice);
 
-        log.info("Invoice {} rejected for subscriber {} with reason: {}", invoice.getInvoiceNumber(), subscriber.getSubscriberCode(), reason);
+        log.info("Invoice {} rejected for subscriber {} (marked INACTIVE, Mother ISP disbursement undone). Reason: {}", 
+                invoice.getInvoiceNumber(), subscriber.getSubscriberCode(), reason);
         return mapInvoiceToDto(invoice);
     }
 

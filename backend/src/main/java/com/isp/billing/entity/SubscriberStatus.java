@@ -4,5 +4,6 @@ public enum SubscriberStatus {
     ACTIVE,
     EXPIRED,
     SUSPENDED,
+    INACTIVE,
     TERMINATED
 }
