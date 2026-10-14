@@ -127,22 +127,13 @@ export default function Packages() {
                   <span className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl">
                     <Zap className="w-5 h-5" />
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                      p.active
-                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800'
-                        : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700'
-                    }`}>
-                      {p.active ? 'Active' : 'Inactive'}
-                    </span>
-                    <button
-                      onClick={() => handleOpenEdit(p)}
-                      title="Edit Package"
-                      className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg transition"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                    p.active
+                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800'
+                      : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700'
+                  }`}>
+                    {p.active ? 'Active' : 'Inactive'}
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">{p.name}</h3>
                 <div className="mt-2 text-2xl font-extrabold text-blue-600 dark:text-blue-400">
