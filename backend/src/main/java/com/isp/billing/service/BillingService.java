@@ -580,25 +580,50 @@ public class BillingService {
         // 3. Delete the invoice itself first
         invoiceRepository.delete(invoice);
 
-        // 4. Roll back subscriber cycle dates if deleted invoice matched current cycle
+        // 4. Reset customer's next billing date & cycle dates
+        LocalDate cycleStartOfDeletedInvoice = invoice.getBillingPeriodStart() != null ? invoice.getBillingPeriodStart() : invoice.getInvoiceDate();
         List<Invoice> remainingInvoices = invoiceRepository.findBySubscriberIdOrderByInvoiceDateDesc(subscriber.getId());
+        
         if (remainingInvoices.isEmpty()) {
-            // Revert back to join date cycle
-            LocalDate join = subscriber.getJoinDate() != null ? subscriber.getJoinDate() : LocalDate.now();
-            subscriber.setCurrentBillingPeriodStart(join);
-            int cycleDay = subscriber.getBillingCycleDay() > 0 ? subscriber.getBillingCycleDay() : join.getDayOfMonth();
-            LocalDate nextCycle = join.plusMonths(1);
-            int targetDay = Math.min(cycleDay, nextCycle.lengthOfMonth());
-            nextCycle = nextCycle.withDayOfMonth(targetDay);
-            subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
-            subscriber.setNextBillingDate(nextCycle);
+            // No other invoices left: reset next billing date back to the cycle start date of the deleted bill
+            // (or joinDate if earlier) so customer can be rebilled for this period
+            if (cycleStartOfDeletedInvoice != null) {
+                subscriber.setNextBillingDate(cycleStartOfDeletedInvoice);
+                subscriber.setCurrentBillingPeriodStart(cycleStartOfDeletedInvoice);
+                int cycleDay = cycleStartOfDeletedInvoice.getDayOfMonth();
+                subscriber.setBillingCycleDay(cycleDay);
+                LocalDate nextCycle = cycleStartOfDeletedInvoice.plusMonths(1);
+                int targetDay = Math.min(cycleDay, nextCycle.lengthOfMonth());
+                nextCycle = nextCycle.withDayOfMonth(targetDay);
+                subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
+            } else {
+                LocalDate join = subscriber.getJoinDate() != null ? subscriber.getJoinDate() : LocalDate.now();
+                subscriber.setNextBillingDate(join);
+                subscriber.setCurrentBillingPeriodStart(join);
+                int cycleDay = subscriber.getBillingCycleDay() > 0 ? subscriber.getBillingCycleDay() : join.getDayOfMonth();
+                LocalDate nextCycle = join.plusMonths(1);
+                int targetDay = Math.min(cycleDay, nextCycle.lengthOfMonth());
+                nextCycle = nextCycle.withDayOfMonth(targetDay);
+                subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
+            }
         } else {
+            // Other invoices exist: reset next billing date to cycle start of deleted invoice if it was the latest,
+            // or to the end of the latest remaining invoice + 1 day
             Invoice latestInv = remainingInvoices.get(0);
-            if (latestInv.getBillingPeriodStart() != null) {
-                subscriber.setCurrentBillingPeriodStart(latestInv.getBillingPeriodStart());
-                subscriber.setCurrentBillingPeriodEnd(latestInv.getBillingPeriodEnd());
-                if (latestInv.getBillingPeriodEnd() != null) {
-                    subscriber.setNextBillingDate(latestInv.getBillingPeriodEnd().plusDays(1));
+            if (cycleStartOfDeletedInvoice != null && (latestInv.getBillingPeriodEnd() == null || cycleStartOfDeletedInvoice.isAfter(latestInv.getBillingPeriodEnd()))) {
+                subscriber.setNextBillingDate(cycleStartOfDeletedInvoice);
+                if (latestInv.getBillingPeriodStart() != null) {
+                    subscriber.setCurrentBillingPeriodStart(latestInv.getBillingPeriodStart());
+                    subscriber.setCurrentBillingPeriodEnd(latestInv.getBillingPeriodEnd());
+                    subscriber.setBillingCycleDay(latestInv.getBillingPeriodStart().getDayOfMonth());
+                }
+            } else if (latestInv.getBillingPeriodEnd() != null) {
+                LocalDate resetDate = latestInv.getBillingPeriodEnd().plusDays(1);
+                subscriber.setNextBillingDate(resetDate);
+                if (latestInv.getBillingPeriodStart() != null) {
+                    subscriber.setCurrentBillingPeriodStart(latestInv.getBillingPeriodStart());
+                    subscriber.setCurrentBillingPeriodEnd(latestInv.getBillingPeriodEnd());
+                    subscriber.setBillingCycleDay(latestInv.getBillingPeriodStart().getDayOfMonth());
                 }
             }
         }
