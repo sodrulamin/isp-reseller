@@ -90,7 +90,6 @@ export default function App() {
           currentTab={currentTab}
           onSelectTab={handleTabChange}
           isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
         />
 
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">

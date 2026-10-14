@@ -10,12 +10,10 @@ import {
   Receipt,
   Settings,
   Building2,
-  LogOut,
-  ChevronLeft,
-  ChevronRight
+  LogOut
 } from 'lucide-react';
 
-export default function Sidebar({ currentTab, onSelectTab, isCollapsed, onToggleCollapse }) {
+export default function Sidebar({ currentTab, onSelectTab, isCollapsed }) {
   const { user, isSuperAdmin, logout } = useAuth();
 
   const menuItems = [
@@ -36,23 +34,7 @@ export default function Sidebar({ currentTab, onSelectTab, isCollapsed, onToggle
         isCollapsed ? 'w-20' : 'w-72'
       } bg-slate-900 dark:bg-slate-950 text-slate-300 flex flex-col flex-shrink-0 h-full overflow-hidden border-r border-transparent dark:border-slate-800/80 transition-all duration-300 ease-in-out select-none relative`}
     >
-      {/* Minimize Toggle Header */}
-      <div className={`p-4 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} border-b border-slate-800/60`}>
-        {!isCollapsed && (
-          <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase px-2">
-            Navigation
-          </p>
-        )}
-        <button
-          onClick={onToggleCollapse}
-          title={isCollapsed ? 'Expand sidebar' : 'Minimize sidebar'}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none"
-        >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
-      </div>
-
-      <div className="p-3 flex-1 overflow-y-auto overflow-x-hidden">
+      <div className="p-3 flex-1 overflow-y-auto overflow-x-hidden pt-4">
         <nav className="space-y-1.5">
           {menuItems.map(item => {
             if (item.role === 'SUPER_ADMIN' && !isSuperAdmin) return null;
