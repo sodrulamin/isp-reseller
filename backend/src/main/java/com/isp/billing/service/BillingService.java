@@ -538,8 +538,8 @@ public class BillingService {
             invoice.setMotherIspDisbursed(false);
         }
 
-        // Mark user as inactive on rejection
-        subscriber.setStatus(SubscriberStatus.INACTIVE);
+        // Mark user as suspended on rejection
+        subscriber.setStatus(SubscriberStatus.SUSPENDED);
 
         // Reset customer's next billing date to cycleStart of rejected invoice
         if (cycleStart != null) {
@@ -553,7 +553,7 @@ public class BillingService {
         invoice.setNotes((invoice.getNotes() != null ? invoice.getNotes() + " | " : "") + "Rejected: " + reason);
         invoice = invoiceRepository.save(invoice);
 
-        log.info("Invoice {} rejected for subscriber {} (marked INACTIVE, Mother ISP disbursement undone). Reason: {}", 
+        log.info("Invoice {} rejected for subscriber {} (marked SUSPENDED, Mother ISP disbursement undone). Reason: {}", 
                 invoice.getInvoiceNumber(), subscriber.getSubscriberCode(), reason);
         return mapInvoiceToDto(invoice);
     }

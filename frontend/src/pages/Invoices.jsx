@@ -531,7 +531,7 @@ export default function Invoices({ onTriggerCycle }) {
               <li>The outstanding due of ৳{Number(selectedRejectInvoice?.dueAmount || 0).toFixed(2)} will be cancelled.</li>
               <li>The subscriber wallet will be credited back the debited due amount.</li>
               <li>Mother ISP disbursement will be undone and refunded.</li>
-              <li>The subscriber line will be marked as INACTIVE.</li>
+              <li>The subscriber line will be marked as SUSPENDED.</li>
             </ul>
           </div>
 
