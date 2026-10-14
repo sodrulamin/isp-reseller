@@ -177,30 +177,34 @@ public class BillingService {
         boolean isFullyCovered = balanceBefore.compareTo(packagePrice) >= 0;
 
         if (isFullyCovered) {
-            // Paid in advance from wallet
+            // Paid in full from advance balance -> Automatically approved and disbursed
             invoice.setPaidAmount(packagePrice);
             invoice.setDueAmount(BigDecimal.ZERO);
             invoice.setStatus("PAID");
-            invoice.setNotes("Settled automatically from subscriber advance wallet balance. Awaiting reseller disbursement approval.");
+            invoice.setMotherIspDisbursed(true);
+            invoice.setNotes("Settled automatically from subscriber advance balance. Automatically approved and disbursed to Mother ISP.");
             subscriber.setStatus(SubscriberStatus.ACTIVE);
-            // Mother ISP disbursement is NOT automatically recorded here.
-            // As per requirement: "Disbursement to mother isp should be done only when I approve the invoice."
+
+            // Record Mother ISP payout automatically since advance payment is already collected
+            recordMotherIspPayoutForCycle(reseller, subscriber, today,
+                    "Automatic disbursement for advance-paid cycle starting " + today);
         } else if (balanceBefore.compareTo(BigDecimal.ZERO) > 0) {
-            // Partially covered by existing balance
+            // Partially covered by existing balance -> Remains awaiting manual approval/settlement for remaining due
             invoice.setPaidAmount(balanceBefore);
             invoice.setDueAmount(packagePrice.subtract(balanceBefore));
             invoice.setStatus("PARTIAL");
+            invoice.setMotherIspDisbursed(false);
             invoice.setNotes("Partially deducted from advance balance. Remaining due: " + invoice.getDueAmount());
             subscriber.setStatus(SubscriberStatus.SUSPENDED);
         } else {
-            // Unpaid / delayed payment
+            // Unpaid / delayed payment -> Remains awaiting approval/payment
             invoice.setPaidAmount(BigDecimal.ZERO);
             invoice.setDueAmount(packagePrice);
             invoice.setStatus("DUE");
+            invoice.setMotherIspDisbursed(false);
             invoice.setNotes("Delayed payment. Added to subscriber wallet overdue balance.");
             subscriber.setStatus(SubscriberStatus.SUSPENDED);
         }
-        invoice.setMotherIspDisbursed(false);
         invoiceRepository.save(invoice);
 
         // 3. Set next billing date to next month with today's date (update the cycle date)
