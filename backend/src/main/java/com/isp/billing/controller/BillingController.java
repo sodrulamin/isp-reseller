@@ -115,6 +115,16 @@ public class BillingController {
         ));
     }
 
+    @DeleteMapping("/invoices/{id}")
+    public ResponseEntity<?> deleteInvoice(@PathVariable Long id) {
+        Reseller r = workspaceContext.getActiveReseller();
+        if (r == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
+        }
+        billingService.deleteInvoice(id, r.getId());
+        return ResponseEntity.ok(Map.of("message", "Invoice deleted and related calculations reverted successfully"));
+    }
+
     @GetMapping("/wallet-transactions")
     public ResponseEntity<List<WalletTransactionDto>> getWalletTransactions(@RequestParam(required = false) Long subscriberId) {
         Reseller r = workspaceContext.getActiveReseller();

@@ -523,6 +523,98 @@ public class BillingService {
         return mapInvoiceToDto(invoice);
     }
 
+    /**
+     * Delete an invoice and undo all related calculations:
+     * 1. Undo wallet deductions / payments made against this invoice.
+     * 2. Remove any Mother ISP disbursement recorded for this invoice's billing period.
+     * 3. Roll back subscriber billing cycle dates if this was the latest invoice.
+     * 4. Remove the invoice record.
+     */
+    @Transactional
+    public void deleteInvoice(Long invoiceId, Long resellerId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + invoiceId));
+        if (!invoice.getReseller().getId().equals(resellerId)) {
+            throw new IllegalArgumentException("Unauthorized: invoice does not belong to your workspace");
+        }
+
+        Subscriber subscriber = invoice.getSubscriber();
+        Reseller reseller = invoice.getReseller();
+        LocalDate cycleStart = invoice.getBillingPeriodStart() != null ? invoice.getBillingPeriodStart() : invoice.getInvoiceDate();
+
+        // 1. Undo Wallet Impact
+        // If the invoice was not REJECTED (where due portion was already reversed):
+        // Re-credit the package fee / deduction that was charged for this cycle.
+        if (!"REJECTED".equals(invoice.getStatus())) {
+            BigDecimal packageAmount = invoice.getPackageAmount() != null ? invoice.getPackageAmount() : invoice.getTotalAmount();
+            if (packageAmount != null && packageAmount.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal balanceBefore = subscriber.getWalletBalance();
+                BigDecimal balanceAfter = balanceBefore.add(packageAmount);
+                subscriber.setWalletBalance(balanceAfter);
+
+                SubscriberWalletTransaction refundTx = new SubscriberWalletTransaction(
+                        reseller,
+                        subscriber,
+                        "INVOICE_DELETION_REFUND",
+                        packageAmount,
+                        balanceBefore,
+                        balanceAfter,
+                        "SYSTEM_ROLLBACK",
+                        "DEL-INV-" + invoice.getInvoiceNumber(),
+                        "Rollback package charge due to deletion of invoice " + invoice.getInvoiceNumber()
+                );
+                walletTransactionRepository.save(refundTx);
+            }
+        }
+
+        // 2. Undo Mother ISP Disbursement if it was disbursed for this cycle
+        if (invoice.isMotherIspDisbursed() && cycleStart != null) {
+            List<MotherIspPayout> payouts = motherIspPayoutRepository.findBySubscriberIdAndCycleDate(subscriber.getId(), cycleStart);
+            for (MotherIspPayout p : payouts) {
+                motherIspPayoutRepository.delete(p);
+                log.info("Undid Mother ISP payout id {} of ৳{} for subscriber {} on cycle {}", 
+                        p.getId(), p.getAmountPaid(), subscriber.getSubscriberCode(), cycleStart);
+            }
+        }
+
+        // 3. Delete the invoice itself first
+        invoiceRepository.delete(invoice);
+
+        // 4. Roll back subscriber cycle dates if deleted invoice matched current cycle
+        List<Invoice> remainingInvoices = invoiceRepository.findBySubscriberIdOrderByInvoiceDateDesc(subscriber.getId());
+        if (remainingInvoices.isEmpty()) {
+            // Revert back to join date cycle
+            LocalDate join = subscriber.getJoinDate() != null ? subscriber.getJoinDate() : LocalDate.now();
+            subscriber.setCurrentBillingPeriodStart(join);
+            int cycleDay = subscriber.getBillingCycleDay() > 0 ? subscriber.getBillingCycleDay() : join.getDayOfMonth();
+            LocalDate nextCycle = join.plusMonths(1);
+            int targetDay = Math.min(cycleDay, nextCycle.lengthOfMonth());
+            nextCycle = nextCycle.withDayOfMonth(targetDay);
+            subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
+            subscriber.setNextBillingDate(nextCycle);
+        } else {
+            Invoice latestInv = remainingInvoices.get(0);
+            if (latestInv.getBillingPeriodStart() != null) {
+                subscriber.setCurrentBillingPeriodStart(latestInv.getBillingPeriodStart());
+                subscriber.setCurrentBillingPeriodEnd(latestInv.getBillingPeriodEnd());
+                if (latestInv.getBillingPeriodEnd() != null) {
+                    subscriber.setNextBillingDate(latestInv.getBillingPeriodEnd().plusDays(1));
+                }
+            }
+        }
+
+        // 5. Update subscriber status based on wallet balance
+        if (subscriber.getWalletBalance().compareTo(BigDecimal.ZERO) >= 0) {
+            subscriber.setStatus(SubscriberStatus.ACTIVE);
+        } else {
+            subscriber.setStatus(SubscriberStatus.SUSPENDED);
+        }
+        subscriberRepository.save(subscriber);
+
+        log.info("Successfully deleted invoice {} and rolled back calculations for subscriber {}", 
+                invoice.getInvoiceNumber(), subscriber.getSubscriberCode());
+    }
+
     @Transactional
     public void renewSubscriberOnCredit(Long subscriberId, Long resellerId) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)

@@ -12,7 +12,8 @@ import {
   Wallet,
   CreditCard,
   Tag,
-  ArrowRight
+  ArrowRight,
+  Trash2
 } from 'lucide-react';
 
 export default function Invoices() {
@@ -97,6 +98,18 @@ export default function Invoices() {
       loadInvoices();
     } catch (err) {
       alert(err.message || 'Failed to reject due invoice');
+    }
+  };
+
+  const handleDeleteInvoice = async (inv) => {
+    const confirmMsg = `Delete invoice ${inv.invoiceNumber}?\n\nThis will undo the package fee deduction, revert any Mother ISP disbursement, and restore previous subscriber cycle calculations.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      await apiClient.delete(`/billing/invoices/${inv.id}`);
+      loadInvoices();
+    } catch (err) {
+      alert(err.message || 'Failed to delete invoice');
     }
   };
 
@@ -230,38 +243,48 @@ export default function Invoices() {
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
-                        {inv.status === 'REJECTED' ? (
-                          <span className="inline-flex items-center gap-1 text-slate-400 dark:text-slate-500 font-semibold text-xs">
-                            <XCircle className="w-3.5 h-3.5 text-slate-400" />
-                            <span>Rejected</span>
-                          </span>
-                        ) : !inv.motherIspDisbursed || hasDue ? (
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() => handleOpenApprove(inv)}
-                              title={hasDue ? "Approve and settle customer due with Mother ISP disbursement" : "Approve and disburse to Mother ISP"}
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm whitespace-nowrap"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{hasDue ? "Approve" : "Approve & Disburse"}</span>
-                            </button>
-                            {hasDue && (
+                        <div className="flex items-center justify-center gap-1.5">
+                          {inv.status === 'REJECTED' ? (
+                            <span className="inline-flex items-center gap-1 text-slate-400 dark:text-slate-500 font-semibold text-xs mr-1">
+                              <XCircle className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Rejected</span>
+                            </span>
+                          ) : !inv.motherIspDisbursed || hasDue ? (
+                            <>
                               <button
-                                onClick={() => handleOpenReject(inv)}
-                                title="Reject due invoice"
-                                className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm border border-rose-200 dark:border-rose-800"
+                                onClick={() => handleOpenApprove(inv)}
+                                title={hasDue ? "Approve and settle customer due with Mother ISP disbursement" : "Approve and disburse to Mother ISP"}
+                                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm whitespace-nowrap"
                               >
-                                <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                                <span>Reject</span>
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>{hasDue ? "Approve" : "Approve & Disburse"}</span>
                               </button>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Settled</span>
-                          </span>
-                        )}
+                              {hasDue && (
+                                <button
+                                  onClick={() => handleOpenReject(inv)}
+                                  title="Reject due invoice"
+                                  className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 font-bold rounded-lg flex items-center gap-1 transition text-xs shadow-sm border border-rose-200 dark:border-rose-800"
+                                >
+                                  <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                                  <span>Reject</span>
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs mr-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Settled</span>
+                            </span>
+                          )}
+
+                          <button
+                            onClick={() => handleDeleteInvoice(inv)}
+                            title="Delete invoice and undo related calculations"
+                            className="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

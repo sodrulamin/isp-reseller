@@ -15,6 +15,8 @@ public interface MotherIspPayoutRepository extends JpaRepository<MotherIspPayout
     List<MotherIspPayout> findByResellerIdOrderByPaymentDateDesc(Long resellerId);
     List<MotherIspPayout> findByResellerIdAndPaymentDateBetweenOrderByPaymentDateDesc(Long resellerId, LocalDate start, LocalDate end);
     boolean existsBySubscriberIdAndCycleDate(Long subscriberId, LocalDate cycleDate);
+    List<MotherIspPayout> findBySubscriberIdAndCycleDate(Long subscriberId, LocalDate cycleDate);
+    void deleteBySubscriberIdAndCycleDate(Long subscriberId, LocalDate cycleDate);
 
     @Query("SELECT COALESCE(SUM(p.amountPaid), 0) FROM MotherIspPayout p WHERE p.reseller.id = :resellerId AND p.paymentDate BETWEEN :start AND :end")
     BigDecimal sumAmountPaidByResellerAndDateRange(@Param("resellerId") Long resellerId, @Param("start") LocalDate start, @Param("end") LocalDate end);
