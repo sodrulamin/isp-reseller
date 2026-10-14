@@ -121,14 +121,16 @@ public class BillingService {
 
         LocalDate today = LocalDate.now();
 
-        // 1 & 2. Check if a bill is already found for the running month (same year & month as today)
+        // 1 & 2. Check if an active (non-rejected) bill is already found for the running month (same year & month as today)
         LocalDate monthStart = today.withDayOfMonth(1);
         LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
-        boolean billExistsThisMonth = invoiceRepository.existsBySubscriberIdAndInvoiceDateBetween(subscriber.getId(), monthStart, monthEnd)
-                || invoiceRepository.existsBySubscriberIdAndBillingPeriodStartBetween(subscriber.getId(), monthStart, monthEnd);
+        boolean billExistsThisMonth = invoiceRepository.findBySubscriberIdOrderByInvoiceDateDesc(subscriber.getId()).stream()
+                .filter(inv -> !"REJECTED".equals(inv.getStatus()))
+                .anyMatch(inv -> (inv.getInvoiceDate() != null && !inv.getInvoiceDate().isBefore(monthStart) && !inv.getInvoiceDate().isAfter(monthEnd))
+                        || (inv.getBillingPeriodStart() != null && !inv.getBillingPeriodStart().isBefore(monthStart) && !inv.getBillingPeriodStart().isAfter(monthEnd)));
 
         if (billExistsThisMonth) {
-            log.info("Skipping subscriber {} as a bill is already generated for running month ({}-{})",
+            log.info("Skipping subscriber {} as an active bill is already generated for running month ({}-{})",
                     subscriber.getSubscriberCode(), today.getYear(), today.getMonthValue());
             return false;
         }

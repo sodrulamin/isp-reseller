@@ -147,6 +147,7 @@ public class SubscriberService {
             s.setJoinDate(req.getJoinDate());
         }
 
+        SubscriberStatus oldStatus = s.getStatus();
         if (req.getStatus() != null) {
             s.setStatus(req.getStatus());
         }
@@ -174,14 +175,35 @@ public class SubscriberService {
             s.setCurrentBillingPeriodEnd(req.getNextBillingDate().minusDays(1));
         }
 
-        return mapToDto(subscriberRepository.save(s));
+        s = subscriberRepository.save(s);
+
+        // If reactivating a suspended subscriber, trigger cycle renewal if billing is due
+        if (oldStatus == SubscriberStatus.SUSPENDED && s.getStatus() == SubscriberStatus.ACTIVE) {
+            LocalDate cycleDate = s.getNextBillingDate() != null ? s.getNextBillingDate() : LocalDate.now();
+            if (!cycleDate.isAfter(LocalDate.now())) {
+                billingService.processMonthlyCycleRenewal(s, cycleDate);
+                s = subscriberRepository.findById(id).orElse(s);
+            }
+        }
+
+        return mapToDto(s);
     }
 
     @Transactional
     public SubscriberDto updateStatus(Long id, Long resellerId, SubscriberStatus status) {
         Subscriber s = getSubscriber(id, resellerId);
+        SubscriberStatus oldStatus = s.getStatus();
         s.setStatus(status);
-        return mapToDto(subscriberRepository.save(s));
+        s = subscriberRepository.save(s);
+
+        if (oldStatus == SubscriberStatus.SUSPENDED && status == SubscriberStatus.ACTIVE) {
+            LocalDate cycleDate = s.getNextBillingDate() != null ? s.getNextBillingDate() : LocalDate.now();
+            if (!cycleDate.isAfter(LocalDate.now())) {
+                billingService.processMonthlyCycleRenewal(s, cycleDate);
+                s = subscriberRepository.findById(id).orElse(s);
+            }
+        }
+        return mapToDto(s);
     }
 
     public SubscriberDto mapToDto(Subscriber s) {
