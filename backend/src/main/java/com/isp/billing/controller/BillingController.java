@@ -3,7 +3,9 @@ package com.isp.billing.controller;
 import com.isp.billing.dto.ApproveInvoiceRequest;
 import com.isp.billing.dto.RejectInvoiceRequest;
 import com.isp.billing.dto.InvoiceDto;
+import com.isp.billing.dto.MotherIspAdjustmentRequest;
 import com.isp.billing.dto.MotherIspPayoutDto;
+import com.isp.billing.dto.MotherIspTransactionDto;
 import com.isp.billing.dto.WalletTransactionDto;
 import com.isp.billing.entity.Reseller;
 import com.isp.billing.security.WorkspaceContext;
@@ -72,6 +74,38 @@ public class BillingController {
             return ResponseEntity.ok(billingService.getAllMotherIspPayouts());
         }
         return ResponseEntity.ok(billingService.getMotherIspPayouts(r.getId()));
+    }
+
+    @GetMapping("/mother-isp-transactions")
+    public ResponseEntity<List<MotherIspTransactionDto>> getMotherIspTransactions() {
+        Reseller r = workspaceContext.getActiveReseller();
+        return ResponseEntity.ok(billingService.getMotherIspTransactions(r != null ? r.getId() : null));
+    }
+
+    @PostMapping("/mother-isp/topup")
+    public ResponseEntity<?> topupMotherIspBalance(@RequestBody MotherIspAdjustmentRequest req) {
+        Reseller r = workspaceContext.getActiveReseller();
+        if (r == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
+        }
+        MotherIspTransactionDto dto = billingService.topupMotherIspBalance(r.getId(), req);
+        return ResponseEntity.ok(Map.of(
+                "message", "Mother ISP balance topped up successfully",
+                "transaction", dto
+        ));
+    }
+
+    @PostMapping("/mother-isp/withdraw")
+    public ResponseEntity<?> withdrawFromMotherIsp(@RequestBody MotherIspAdjustmentRequest req) {
+        Reseller r = workspaceContext.getActiveReseller();
+        if (r == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Workspace context required"));
+        }
+        MotherIspTransactionDto dto = billingService.withdrawFromMotherIsp(r.getId(), req);
+        return ResponseEntity.ok(Map.of(
+                "message", "Mother ISP balance withdrawal recorded successfully",
+                "transaction", dto
+        ));
     }
 
     @GetMapping("/invoices")

@@ -3,7 +3,9 @@ package com.isp.billing.service;
 import com.isp.billing.dto.ApproveInvoiceRequest;
 import com.isp.billing.dto.RejectInvoiceRequest;
 import com.isp.billing.dto.InvoiceDto;
+import com.isp.billing.dto.MotherIspAdjustmentRequest;
 import com.isp.billing.dto.MotherIspPayoutDto;
+import com.isp.billing.dto.MotherIspTransactionDto;
 import com.isp.billing.dto.WalletDepositRequest;
 import com.isp.billing.dto.WalletTransactionDto;
 import com.isp.billing.entity.*;
@@ -32,17 +34,20 @@ public class BillingService {
     private final SubscriberWalletTransactionRepository walletTransactionRepository;
     private final InvoiceRepository invoiceRepository;
     private final ResellerRepository resellerRepository;
+    private final MotherIspAccountTransactionRepository motherIspAccountTransactionRepository;
 
     public BillingService(SubscriberRepository subscriberRepository,
                           MotherIspPayoutRepository motherIspPayoutRepository,
                           SubscriberWalletTransactionRepository walletTransactionRepository,
                           InvoiceRepository invoiceRepository,
-                          ResellerRepository resellerRepository) {
+                          ResellerRepository resellerRepository,
+                          MotherIspAccountTransactionRepository motherIspAccountTransactionRepository) {
         this.subscriberRepository = subscriberRepository;
         this.motherIspPayoutRepository = motherIspPayoutRepository;
         this.walletTransactionRepository = walletTransactionRepository;
         this.invoiceRepository = invoiceRepository;
         this.resellerRepository = resellerRepository;
+        this.motherIspAccountTransactionRepository = motherIspAccountTransactionRepository;
     }
 
     /**
@@ -266,16 +271,18 @@ public class BillingService {
         BigDecimal resellerCredited = BigDecimal.ZERO;
 
         if ("MOTHER_ISP_PORTAL".equals(channel)) {
-            // Mother ISP immediately retains her configured % and reseller gets remaining % into their Mother ISP balance
-            motherIspRetained = depositAmount.multiply(motherIspRate)
-                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-            resellerCredited = depositAmount.subtract(motherIspRetained);
-
-            BigDecimal currentBalance = reseller.getMotherIspResellerBalance() != null
-                    ? reseller.getMotherIspResellerBalance()
-                    : BigDecimal.ZERO;
-            reseller.setMotherIspResellerBalance(currentBalance.add(resellerCredited));
-            resellerRepository.save(reseller);
+            // Customer paid via Mother ISP Portal -> Total amount added to Reseller balance in Mother ISP
+            resellerCredited = depositAmount;
+            motherIspRetained = BigDecimal.ZERO;
+            recordMotherIspAccountTransaction(
+                    reseller,
+                    subscriber,
+                    "CUSTOMER_PORTAL_PAYMENT",
+                    depositAmount,
+                    req.getPaymentMethod(),
+                    ref,
+                    "Customer portal payment deposited by " + subscriber.getName() + " (" + subscriber.getSubscriberCode() + ")"
+            );
         }
 
         SubscriberWalletTransaction tx = new SubscriberWalletTransaction(
@@ -539,6 +546,15 @@ public class BillingService {
         if (invoice.isMotherIspDisbursed() && cycleStart != null) {
             List<MotherIspPayout> payouts = motherIspPayoutRepository.findBySubscriberIdAndCycleDate(subscriber.getId(), cycleStart);
             for (MotherIspPayout p : payouts) {
+                recordMotherIspAccountTransaction(
+                        reseller,
+                        subscriber,
+                        "DISBURSEMENT_REVERSAL",
+                        p.getAmountPaid(),
+                        "SYSTEM_REVERSAL",
+                        "REV-" + (p.getTransactionRef() != null ? p.getTransactionRef() : ("PAY-" + p.getId())),
+                        "Reversal of Mother ISP disbursement for rejected due invoice #" + invoice.getInvoiceNumber()
+                );
                 motherIspPayoutRepository.delete(p);
                 log.info("Undid Mother ISP payout id {} of ৳{} for subscriber {} on cycle {} due to rejection", 
                         p.getId(), p.getAmountPaid(), subscriber.getSubscriberCode(), cycleStart);
@@ -614,6 +630,15 @@ public class BillingService {
         if (invoice.isMotherIspDisbursed() && cycleStart != null) {
             List<MotherIspPayout> payouts = motherIspPayoutRepository.findBySubscriberIdAndCycleDate(subscriber.getId(), cycleStart);
             for (MotherIspPayout p : payouts) {
+                recordMotherIspAccountTransaction(
+                        reseller,
+                        subscriber,
+                        "DISBURSEMENT_REVERSAL",
+                        p.getAmountPaid(),
+                        "SYSTEM_ROLLBACK",
+                        "DEL-" + (p.getTransactionRef() != null ? p.getTransactionRef() : ("PAY-" + p.getId())),
+                        "Rollback Mother ISP disbursement due to deletion of invoice #" + invoice.getInvoiceNumber()
+                );
                 motherIspPayoutRepository.delete(p);
                 log.info("Undid Mother ISP payout id {} of ৳{} for subscriber {} on cycle {}", 
                         p.getId(), p.getAmountPaid(), subscriber.getSubscriberCode(), cycleStart);
@@ -784,7 +809,130 @@ public class BillingService {
         payout.setTransactionRef("M-ISP-" + cycleDate.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + subscriber.getId());
         MotherIspPayout saved = motherIspPayoutRepository.save(payout);
         log.info("Recorded Mother ISP payout of ৳{} for subscriber {} (cycle: {})", motherIspAmount, subscriber.getSubscriberCode(), cycleDate);
+
+        // Reseller balance is deducted only the amount disbursed to Mother ISP
+        recordMotherIspAccountTransaction(
+                reseller,
+                subscriber,
+                "CYCLE_DISBURSEMENT",
+                motherIspAmount.negate(),
+                "SYSTEM",
+                payout.getTransactionRef(),
+                notes != null ? notes : ("Mother ISP disbursement deduction for cycle " + cycleDate)
+        );
+
         return saved;
+    }
+
+    public MotherIspAccountTransaction recordMotherIspAccountTransaction(Reseller reseller,
+                                                                         Subscriber subscriber,
+                                                                         String transactionType,
+                                                                         BigDecimal amount,
+                                                                         String paymentMethod,
+                                                                         String ref,
+                                                                         String notes) {
+        BigDecimal balanceBefore = reseller.getMotherIspResellerBalance() != null
+                ? reseller.getMotherIspResellerBalance()
+                : BigDecimal.ZERO;
+        BigDecimal balanceAfter = balanceBefore.add(amount);
+        reseller.setMotherIspResellerBalance(balanceAfter);
+        resellerRepository.save(reseller);
+
+        MotherIspAccountTransaction tx = new MotherIspAccountTransaction(
+                reseller,
+                subscriber,
+                transactionType,
+                amount,
+                balanceBefore,
+                balanceAfter,
+                paymentMethod,
+                ref,
+                notes
+        );
+        return motherIspAccountTransactionRepository.save(tx);
+    }
+
+    @Transactional
+    public MotherIspTransactionDto topupMotherIspBalance(Long resellerId, MotherIspAdjustmentRequest req) {
+        Reseller reseller = resellerRepository.findById(resellerId)
+                .orElseThrow(() -> new IllegalArgumentException("Reseller not found with id: " + resellerId));
+        if (req.getAmount() == null || req.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Top-up amount must be greater than zero");
+        }
+        String ref = req.getTransactionRef() != null && !req.getTransactionRef().isBlank()
+                ? req.getTransactionRef().trim()
+                : "TOPUP-" + System.currentTimeMillis();
+        String notes = req.getNotes() != null && !req.getNotes().isBlank()
+                ? req.getNotes().trim()
+                : "Reseller top-up payment to Mother ISP";
+
+        MotherIspAccountTransaction tx = recordMotherIspAccountTransaction(
+                reseller,
+                null,
+                "RESELLER_TOPUP",
+                req.getAmount(),
+                req.getPaymentMethod() != null ? req.getPaymentMethod() : "BANK_TRANSFER",
+                ref,
+                notes
+        );
+        return mapMotherIspTransactionToDto(tx);
+    }
+
+    @Transactional
+    public MotherIspTransactionDto withdrawFromMotherIsp(Long resellerId, MotherIspAdjustmentRequest req) {
+        Reseller reseller = resellerRepository.findById(resellerId)
+                .orElseThrow(() -> new IllegalArgumentException("Reseller not found with id: " + resellerId));
+        if (req.getAmount() == null || req.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be greater than zero");
+        }
+        String ref = req.getTransactionRef() != null && !req.getTransactionRef().isBlank()
+                ? req.getTransactionRef().trim()
+                : "WTH-" + System.currentTimeMillis();
+        String notes = req.getNotes() != null && !req.getNotes().isBlank()
+                ? req.getNotes().trim()
+                : "Reseller earnings withdrawal from Mother ISP";
+
+        MotherIspAccountTransaction tx = recordMotherIspAccountTransaction(
+                reseller,
+                null,
+                "RESELLER_WITHDRAWAL",
+                req.getAmount().negate(),
+                req.getPaymentMethod() != null ? req.getPaymentMethod() : "BANK_TRANSFER",
+                ref,
+                notes
+        );
+        return mapMotherIspTransactionToDto(tx);
+    }
+
+    public List<MotherIspTransactionDto> getMotherIspTransactions(Long resellerId) {
+        List<MotherIspAccountTransaction> list;
+        if (resellerId != null) {
+            list = motherIspAccountTransactionRepository.findByResellerIdOrderByTransactionDateDesc(resellerId);
+        } else {
+            list = motherIspAccountTransactionRepository.findAllByOrderByTransactionDateDesc();
+        }
+        return list.stream().map(this::mapMotherIspTransactionToDto).collect(Collectors.toList());
+    }
+
+    public MotherIspTransactionDto mapMotherIspTransactionToDto(MotherIspAccountTransaction tx) {
+        MotherIspTransactionDto dto = new MotherIspTransactionDto();
+        dto.setId(tx.getId());
+        dto.setResellerId(tx.getReseller().getId());
+        dto.setResellerName(tx.getReseller().getName());
+        if (tx.getSubscriber() != null) {
+            dto.setSubscriberId(tx.getSubscriber().getId());
+            dto.setSubscriberName(tx.getSubscriber().getName());
+            dto.setSubscriberCode(tx.getSubscriber().getSubscriberCode());
+        }
+        dto.setTransactionType(tx.getTransactionType());
+        dto.setAmount(tx.getAmount());
+        dto.setBalanceBefore(tx.getBalanceBefore());
+        dto.setBalanceAfter(tx.getBalanceAfter());
+        dto.setPaymentMethod(tx.getPaymentMethod());
+        dto.setTransactionRef(tx.getTransactionRef());
+        dto.setNotes(tx.getNotes());
+        dto.setTransactionDate(tx.getTransactionDate());
+        return dto;
     }
 
     public InvoiceDto mapInvoiceToDto(Invoice inv) {
