@@ -361,6 +361,12 @@ public class BillingService {
                 .collect(Collectors.toList());
     }
 
+    public List<MotherIspPayoutDto> getAllMotherIspPayouts() {
+        return motherIspPayoutRepository.findAllByOrderByPaymentDateDesc().stream()
+                .map(this::mapPayoutToDto)
+                .collect(Collectors.toList());
+    }
+
     public List<WalletTransactionDto> getWalletTransactions(Long resellerId, Long subscriberId) {
         List<SubscriberWalletTransaction> list;
         if (subscriberId != null) {

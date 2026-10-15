@@ -15,10 +15,10 @@ export default function MotherIspExpenses() {
     try {
       const [payoutsData, resellerData] = await Promise.all([
         apiClient.get('/billing/mother-isp-payouts'),
-        apiClient.get('/auth/me')
+        apiClient.get('/workspace/current')
       ]);
       setPayouts(payoutsData || []);
-      setReseller(resellerData?.reseller || null);
+      setReseller(resellerData || null);
     } catch (err) {
       console.error(err);
     } finally {

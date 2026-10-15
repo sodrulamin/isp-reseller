@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface MotherIspPayoutRepository extends JpaRepository<MotherIspPayout, Long> {
     List<MotherIspPayout> findByResellerIdOrderByPaymentDateDesc(Long resellerId);
+    List<MotherIspPayout> findAllByOrderByPaymentDateDesc();
     List<MotherIspPayout> findByResellerIdAndPaymentDateBetweenOrderByPaymentDateDesc(Long resellerId, LocalDate start, LocalDate end);
     boolean existsBySubscriberIdAndCycleDate(Long subscriberId, LocalDate cycleDate);
     List<MotherIspPayout> findBySubscriberIdAndCycleDate(Long subscriberId, LocalDate cycleDate);

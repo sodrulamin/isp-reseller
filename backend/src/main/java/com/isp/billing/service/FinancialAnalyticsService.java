@@ -232,6 +232,7 @@ public class FinancialAnalyticsService {
         dto.setTotalRevenue(totalRevenue);
 
         dto.setMotherIspPayoutExpense(motherIspExpense);
+        dto.setMotherIspResellerBalance(resellerRepository.sumTotalMotherIspResellerBalance());
         dto.setEquipmentPurchaseExpense(equipmentExpense);
         dto.setPhysicalServiceExpense(serviceExpense);
         dto.setTotalExpenses(totalExpenses);

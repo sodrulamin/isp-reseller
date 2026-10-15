@@ -69,7 +69,7 @@ public class BillingController {
     public ResponseEntity<List<MotherIspPayoutDto>> getMotherIspPayouts() {
         Reseller r = workspaceContext.getActiveReseller();
         if (r == null) {
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(billingService.getAllMotherIspPayouts());
         }
         return ResponseEntity.ok(billingService.getMotherIspPayouts(r.getId()));
     }
