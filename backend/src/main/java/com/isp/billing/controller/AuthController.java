@@ -2,16 +2,19 @@ package com.isp.billing.controller;
 
 import com.isp.billing.dto.AuthRequest;
 import com.isp.billing.dto.AuthResponse;
+import com.isp.billing.dto.ChangePasswordRequest;
 import com.isp.billing.entity.User;
 import com.isp.billing.repository.UserRepository;
 import com.isp.billing.security.CustomUserDetails;
 import com.isp.billing.security.JwtUtils;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -23,11 +26,16 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserRepository userRepository) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          JwtUtils jwtUtils,
+                          UserRepository userRepository,
+                          PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -102,5 +110,37 @@ public class AuthController {
                 "resellerName", userDetails.getResellerName() != null ? userDetails.getResellerName() : "",
                 "resellerCode", userDetails.getResellerCode() != null ? userDetails.getResellerCode() : ""
         ));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                            @Valid @RequestBody ChangePasswordRequest req) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Not authenticated"));
+        }
+
+        if (req.getNewPassword() == null || req.getNewPassword().length() < 6) {
+            return ResponseEntity.badRequest().body(Map.of("message", "New password must be at least 6 characters"));
+        }
+
+        if (!req.getNewPassword().equals(req.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "New password and confirmation do not match"));
+        }
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Current password is incorrect"));
+        }
+
+        if (passwordEncoder.matches(req.getNewPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "New password cannot be the same as your current password"));
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
     }
 }
