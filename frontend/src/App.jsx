@@ -11,6 +11,7 @@ import EquipmentExpenses from './pages/EquipmentExpenses';
 import ServiceTickets from './pages/ServiceTickets';
 import Packages from './pages/Packages';
 import Invoices from './pages/Invoices';
+import CollectedByMe from './pages/CollectedByMe';
 import ResellerManagement from './pages/ResellerManagement';
 import WorkspaceSettings from './pages/WorkspaceSettings';
 
@@ -18,6 +19,7 @@ const TAB_TO_PATH = {
   dashboard: '/dashboard',
   subscribers: '/subscribers',
   invoices: '/invoices',
+  'collected-by-me': '/collected-by-me',
   'mother-isp': '/mother-isp',
   equipment: '/equipment',
   packages: '/packages',
@@ -30,6 +32,7 @@ const PATH_TO_TAB = {
   '/dashboard': 'dashboard',
   '/subscribers': 'subscribers',
   '/invoices': 'invoices',
+  '/collected-by-me': 'collected-by-me',
   '/mother-isp': 'mother-isp',
   '/equipment': 'equipment',
   '/packages': 'packages',
@@ -107,7 +110,8 @@ export default function App() {
         <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-y-auto w-full min-w-0 h-full">
           {currentTab === 'dashboard' && <Dashboard key={cycleKey} onNavigate={handleTabChange} />}
           {currentTab === 'subscribers' && <Subscribers key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
-          {currentTab === 'invoices' && <Invoices key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} />}
+          {currentTab === 'invoices' && <Invoices key={cycleKey} onTriggerCycle={() => setCycleKey(k => k + 1)} onNavigate={handleTabChange} />}
+          {currentTab === 'collected-by-me' && <CollectedByMe key={cycleKey} onNavigate={handleTabChange} />}
           {currentTab === 'mother-isp' && <MotherIspExpenses key={cycleKey} />}
           {currentTab === 'equipment' && <EquipmentExpenses key={cycleKey} />}
           {currentTab === 'packages' && <Packages key={cycleKey} />}

@@ -384,6 +384,16 @@ public class BillingService {
         return list.stream().map(this::mapTxToDto).collect(Collectors.toList());
     }
 
+    public List<WalletTransactionDto> getCollectedByMeTransactions(Long resellerId) {
+        List<SubscriberWalletTransaction> list;
+        if (resellerId != null) {
+            list = walletTransactionRepository.findDirectCollectionsByReseller(resellerId);
+        } else {
+            list = walletTransactionRepository.findAllDirectCollections();
+        }
+        return list.stream().map(this::mapTxToDto).collect(Collectors.toList());
+    }
+
     public List<InvoiceDto> getInvoices(Long resellerId, Long subscriberId) {
         List<Invoice> list;
         if (subscriberId != null) {

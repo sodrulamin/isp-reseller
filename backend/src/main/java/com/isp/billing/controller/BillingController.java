@@ -167,4 +167,10 @@ public class BillingController {
         }
         return ResponseEntity.ok(billingService.getWalletTransactions(r.getId(), subscriberId));
     }
+
+    @GetMapping("/collected-by-me")
+    public ResponseEntity<List<WalletTransactionDto>> getCollectedByMeTransactions() {
+        Reseller r = workspaceContext.getActiveReseller();
+        return ResponseEntity.ok(billingService.getCollectedByMeTransactions(r != null ? r.getId() : null));
+    }
 }
