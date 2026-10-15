@@ -10,10 +10,11 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/isp_billing_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: "isp_billing_only_user"
-      SPRING_DATASOURCE_PASSWORD: "0xd_Eye]47JF"
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-isp_billing_only_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-0xd_Eye]47JF}
+      APP_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_URLS:-http://localhost:3203}
       SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
-      BILLING_CYCLE_CRON: "0 */5 * * * ?"
+      BILLING_CYCLE_CRON: "0 0 1 * * ?"
     networks:
       - sas-net
 
