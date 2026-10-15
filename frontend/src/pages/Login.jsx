@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, ArrowRight, Lock, User, AlertCircle, Building2 } from 'lucide-react';
+import { ArrowRight, Lock, User, AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const { login, loading } = useAuth();
@@ -16,11 +16,6 @@ export default function Login() {
     } catch (err) {
       setError(err.message || 'Login failed. Please check credentials.');
     }
-  };
-
-  const handleDemoFill = (u, p) => {
-    setUsername(u);
-    setPassword(p);
   };
 
   return (
@@ -90,38 +85,6 @@ export default function Login() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-slate-700/60">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
-              Quick One-Click Demo Logins:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleDemoFill('reseller_apex', 'Password@123')}
-                className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-200 text-xs text-left border border-slate-600/50 transition"
-              >
-                <Building2 className="w-3.5 h-3.5 text-blue-400" />
-                <div>
-                  <div className="font-semibold text-white">Apex Reseller</div>
-                  <div className="text-[10px] text-slate-400">49% Mother ISP</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDemoFill('superadmin', 'Password@123')}
-                className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-200 text-xs text-left border border-slate-600/50 transition"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                <div>
-                  <div className="font-semibold text-white">Super Admin</div>
-                  <div className="text-[10px] text-slate-400">Manage all tenants</div>
-                </div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
