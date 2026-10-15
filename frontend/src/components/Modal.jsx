@@ -2,6 +2,16 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
+const MAX_WIDTHS = {
+  'max-w-sm': 'max-w-sm',
+  'max-w-md': 'max-w-md',
+  'max-w-lg': 'max-w-lg',
+  'max-w-xl': 'max-w-xl',
+  'max-w-2xl': 'max-w-2xl',
+  'max-w-3xl': 'max-w-3xl',
+  'max-w-4xl': 'max-w-4xl',
+};
+
 export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -19,9 +29,11 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   if (!isOpen) return null;
 
+  const widthClass = MAX_WIDTHS[maxWidth] || maxWidth || 'max-w-lg';
+
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full ${maxWidth} max-w-[calc(100vw-1.5rem)] overflow-hidden transform transition-all`}>
+      <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full ${widthClass} overflow-hidden transform transition-all`}>
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
           <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base truncate pr-2">{title}</h3>
           <button
