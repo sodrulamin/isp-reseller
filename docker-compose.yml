@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: Dockerfile
     image: isp-reseller-backend:latest
     container_name: isp-reseller-backend
     restart: unless-stopped
@@ -20,8 +20,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./frontend
+      dockerfile: Dockerfile
     image: isp-reseller-frontend:latest
     container_name: isp-reseller-frontend
     restart: unless-stopped
