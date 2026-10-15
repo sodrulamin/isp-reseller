@@ -65,6 +65,18 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // When user logs in, always reset default view to 'dashboard'
+  const prevUserRef = React.useRef(user);
+  React.useEffect(() => {
+    if (!prevUserRef.current && user) {
+      setCurrentTab('dashboard');
+      if (window.location.pathname !== '/dashboard') {
+        window.history.replaceState({ tab: 'dashboard' }, '', '/dashboard');
+      }
+    }
+    prevUserRef.current = user;
+  }, [user]);
+
   const handleTabChange = (tabId) => {
     setCurrentTab(tabId);
     setIsMobileSidebarOpen(false);

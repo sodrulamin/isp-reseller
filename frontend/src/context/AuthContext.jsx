@@ -39,6 +39,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('isp_active_workspace_id');
         setActiveWorkspaceId('');
       }
+      if (window.location.pathname !== '/dashboard') {
+        window.history.replaceState({ tab: 'dashboard' }, '', '/dashboard');
+      }
       return data;
     } finally {
       setLoading(false);
@@ -52,6 +55,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('isp_active_workspace_id');
     setUser(null);
     setActiveWorkspaceId('');
+    if (window.location.pathname !== '/dashboard') {
+      window.history.replaceState({ tab: 'dashboard' }, '', '/dashboard');
+    }
   };
 
   const switchWorkspace = (resellerId) => {
