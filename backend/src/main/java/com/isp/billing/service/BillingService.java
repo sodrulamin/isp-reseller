@@ -149,10 +149,10 @@ public class BillingService {
         BigDecimal balanceAfter = balanceBefore.subtract(packagePrice);
         subscriber.setWalletBalance(balanceAfter);
 
-        // Calculate next billing date: next month with today's date
-        int todayDay = today.getDayOfMonth();
+        // Calculate next billing date: next month with subscriber's cycle day
+        int cycleDay = subscriber.getBillingCycleDay() > 0 ? subscriber.getBillingCycleDay() : today.getDayOfMonth();
         LocalDate nextCycleMonth = today.plusMonths(1);
-        int targetDay = Math.min(todayDay, nextCycleMonth.lengthOfMonth());
+        int targetDay = Math.min(cycleDay, nextCycleMonth.lengthOfMonth());
         LocalDate nextCycle = nextCycleMonth.withDayOfMonth(targetDay);
 
         SubscriberWalletTransaction deductionTx = new SubscriberWalletTransaction(
@@ -222,8 +222,8 @@ public class BillingService {
         }
         invoiceRepository.save(invoice);
 
-        // 3. Set next billing date to next month with today's date (update the cycle date)
-        subscriber.setBillingCycleDay(todayDay);
+        // 3. Set next billing date to next month with cycle date
+        subscriber.setBillingCycleDay(cycleDay);
         subscriber.setCurrentBillingPeriodStart(today);
         subscriber.setCurrentBillingPeriodEnd(nextCycle.minusDays(1));
         subscriber.setNextBillingDate(nextCycle);

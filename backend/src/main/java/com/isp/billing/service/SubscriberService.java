@@ -64,7 +64,11 @@ public class SubscriberService {
 
         LocalDate joinDate = req.getJoinDate() != null ? req.getJoinDate() : LocalDate.now();
         int cycleDay = req.getBillingCycleDay() != null ? req.getBillingCycleDay() : joinDate.getDayOfMonth();
-        LocalDate nextBilling = req.getNextBillingDate() != null ? req.getNextBillingDate() : joinDate.plusMonths(1);
+        LocalDate nextBilling = req.getNextBillingDate() != null ? req.getNextBillingDate() : joinDate;
+
+        LocalDate nextCycleMonth = joinDate.plusMonths(1);
+        int targetDay = Math.min(cycleDay, nextCycleMonth.lengthOfMonth());
+        LocalDate periodEnd = nextCycleMonth.withDayOfMonth(targetDay).minusDays(1);
 
         String code = req.getSubscriberCode();
         if (code == null || code.isBlank()) {
@@ -83,7 +87,7 @@ public class SubscriberService {
         subscriber.setJoinDate(joinDate);
         subscriber.setBillingCycleDay(cycleDay);
         subscriber.setCurrentBillingPeriodStart(joinDate);
-        subscriber.setCurrentBillingPeriodEnd(nextBilling.minusDays(1));
+        subscriber.setCurrentBillingPeriodEnd(periodEnd);
         subscriber.setNextBillingDate(nextBilling);
         subscriber.setMotherIspRateOverride(req.getMotherIspRateOverride());
         subscriber.setWalletBalance(BigDecimal.ZERO);
@@ -106,8 +110,7 @@ public class SubscriberService {
             subscriber = subscriberRepository.findById(subscriber.getId()).orElse(subscriber);
         }
 
-        // Initialize Month 1: Calculate mother ISP payout & debit wallet / invoice cycle
-        billingService.processMonthlyCycleRenewal(subscriber, joinDate);
+        // Do not generate invoice immediately. The scheduled billing cycle job will process invoices when due.
 
         return mapToDto(subscriber);
     }
