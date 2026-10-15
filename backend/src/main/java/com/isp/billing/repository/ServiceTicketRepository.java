@@ -18,4 +18,7 @@ public interface ServiceTicketRepository extends JpaRepository<ServiceTicket, Lo
     // Sum physical service operational costs for reseller
     @Query("SELECT COALESCE(SUM(t.operationalCost), 0) FROM ServiceTicket t WHERE t.reseller.id = :resellerId AND t.reportedDate BETWEEN :start AND :end")
     BigDecimal sumOperationalCostByResellerAndDateRange(@Param("resellerId") Long resellerId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(t.operationalCost), 0) FROM ServiceTicket t WHERE t.reportedDate BETWEEN :start AND :end")
+    BigDecimal sumTotalOperationalCostByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

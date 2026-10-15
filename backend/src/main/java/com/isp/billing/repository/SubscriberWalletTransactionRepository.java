@@ -31,4 +31,13 @@ public interface SubscriberWalletTransactionRepository extends JpaRepository<Sub
 
     @Query("SELECT COALESCE(SUM(w.amount), 0) FROM SubscriberWalletTransaction w WHERE w.transactionType = 'DEPOSIT' AND w.transactionDate BETWEEN :start AND :end")
     BigDecimal sumTotalDepositsCollectedByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM SubscriberWalletTransaction w WHERE w.transactionType = 'DEPOSIT' AND (w.paymentChannel = 'DIRECT_RESELLER' OR w.paymentChannel IS NULL) AND w.transactionDate BETWEEN :start AND :end")
+    BigDecimal sumTotalDirectDepositsByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM SubscriberWalletTransaction w WHERE w.transactionType = 'DEPOSIT' AND w.paymentChannel = 'MOTHER_ISP_PORTAL' AND w.transactionDate BETWEEN :start AND :end")
+    BigDecimal sumTotalPortalDepositsByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(w.resellerCreditedAmount), 0) FROM SubscriberWalletTransaction w WHERE w.transactionType = 'DEPOSIT' AND w.paymentChannel = 'MOTHER_ISP_PORTAL' AND w.transactionDate BETWEEN :start AND :end")
+    BigDecimal sumTotalPortalResellerShareByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

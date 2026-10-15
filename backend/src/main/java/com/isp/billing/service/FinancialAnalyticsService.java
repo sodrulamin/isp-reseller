@@ -178,22 +178,105 @@ public class FinancialAnalyticsService {
         LocalDateTime monthStartDt = monthStart.atStartOfDay();
         LocalDateTime monthEndDt = monthEnd.atTime(23, 59, 59);
 
+        // Revenue calculations
         BigDecimal packageCollections = walletTransactionRepository.sumTotalDepositsCollectedByDateRange(monthStartDt, monthEndDt);
+        BigDecimal directCollections = walletTransactionRepository.sumTotalDirectDepositsByDateRange(monthStartDt, monthEndDt);
+        BigDecimal portalCollections = walletTransactionRepository.sumTotalPortalDepositsByDateRange(monthStartDt, monthEndDt);
+        BigDecimal equipmentSales = equipmentRepository.sumTotalCustomerPaidAmountByDateRange(monthStart, monthEnd);
+        BigDecimal totalRevenue = packageCollections.add(equipmentSales);
+
+        // Expense calculations
         BigDecimal motherIspExpense = motherIspPayoutRepository.sumTotalAmountPaidByDateRange(monthStart, monthEnd);
-        BigDecimal netProfit = packageCollections.subtract(motherIspExpense);
+        BigDecimal equipmentExpense = equipmentRepository.sumTotalPurchaseCostByDateRange(monthStart, monthEnd);
+        BigDecimal serviceExpense = serviceTicketRepository.sumTotalOperationalCostByDateRange(monthStartDt, monthEndDt);
+        BigDecimal totalExpenses = motherIspExpense.add(equipmentExpense).add(serviceExpense);
+
+        // Profit calculations
+        BigDecimal packageGrossProfit = packageCollections.subtract(motherIspExpense);
+        BigDecimal packageGrossMarginPercent = packageCollections.compareTo(BigDecimal.ZERO) > 0
+                ? packageGrossProfit.multiply(new BigDecimal("100")).divide(packageCollections, 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        BigDecimal netProfit = totalRevenue.subtract(totalExpenses);
+        BigDecimal netMarginPercent = totalRevenue.compareTo(BigDecimal.ZERO) > 0
+                ? netProfit.multiply(new BigDecimal("100")).divide(totalRevenue, 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // Subscriber Metrics
+        long totalSubscribers = subscriberRepository.count();
+        long activeSubscribers = subscriberRepository.countByStatus(SubscriberStatus.ACTIVE);
+
+        BigDecimal totalOutstandingDue = BigDecimal.ZERO;
+        BigDecimal totalWalletCredits = BigDecimal.ZERO;
+        List<Subscriber> allSubscribers = subscriberRepository.findAll();
+        for (Subscriber s : allSubscribers) {
+            BigDecimal bal = s.getWalletBalance();
+            if (bal != null) {
+                if (bal.compareTo(BigDecimal.ZERO) < 0) {
+                    totalOutstandingDue = totalOutstandingDue.add(bal.abs());
+                } else {
+                    totalWalletCredits = totalWalletCredits.add(bal);
+                }
+            }
+        }
 
         FinancialSummaryDto dto = new FinancialSummaryDto();
         dto.setMonth(ym.toString());
         dto.setMonthLabel(ym.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
         dto.setResellerName("Global Platform Total");
+
         dto.setPackageCollections(packageCollections);
-        dto.setTotalRevenue(packageCollections);
+        dto.setDirectPackageCollections(directCollections);
+        dto.setPortalPackageCollections(portalCollections);
+        dto.setEquipmentSalesCollections(equipmentSales);
+        dto.setTotalRevenue(totalRevenue);
+
         dto.setMotherIspPayoutExpense(motherIspExpense);
-        dto.setTotalExpenses(motherIspExpense);
-        dto.setPackageGrossProfit(netProfit);
+        dto.setEquipmentPurchaseExpense(equipmentExpense);
+        dto.setPhysicalServiceExpense(serviceExpense);
+        dto.setTotalExpenses(totalExpenses);
+
+        dto.setPackageGrossProfit(packageGrossProfit);
+        dto.setPackageGrossMarginPercent(packageGrossMarginPercent);
         dto.setNetMonthlyProfit(netProfit);
-        dto.setTotalSubscribers(subscriberRepository.count());
-        dto.setActiveSubscribers(subscriberRepository.findAll().stream().filter(s -> s.getStatus() == SubscriberStatus.ACTIVE).count());
+        dto.setNetMarginPercent(netMarginPercent);
+
+        dto.setTotalSubscribers(totalSubscribers);
+        dto.setActiveSubscribers(activeSubscribers);
+        dto.setTotalSubscriberOutstandingDue(totalOutstandingDue);
+        dto.setTotalSubscriberWalletCredits(totalWalletCredits);
+
+        // Historical 6-Month Trend Points across all resellers
+        List<FinancialSummaryDto.MonthlyTrendPoint> trends = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            YearMonth historicalYm = ym.minusMonths(i);
+            LocalDate hStart = historicalYm.atDay(1);
+            LocalDate hEnd = historicalYm.atEndOfMonth();
+            LocalDateTime hStartDt = hStart.atStartOfDay();
+            LocalDateTime hEndDt = hEnd.atTime(23, 59, 59);
+
+            BigDecimal hPkgRev = walletTransactionRepository.sumTotalDepositsCollectedByDateRange(hStartDt, hEndDt);
+            BigDecimal hEqRev = equipmentRepository.sumTotalCustomerPaidAmountByDateRange(hStart, hEnd);
+            BigDecimal hTotRev = hPkgRev.add(hEqRev);
+
+            BigDecimal hMotherIsp = motherIspPayoutRepository.sumTotalAmountPaidByDateRange(hStart, hEnd);
+            BigDecimal hEqExp = equipmentRepository.sumTotalPurchaseCostByDateRange(hStart, hEnd);
+            BigDecimal hSvcExp = serviceTicketRepository.sumTotalOperationalCostByDateRange(hStartDt, hEndDt);
+            BigDecimal hOtherExp = hEqExp.add(hSvcExp);
+            BigDecimal hTotExp = hMotherIsp.add(hOtherExp);
+            BigDecimal hNetProfit = hTotRev.subtract(hTotExp);
+
+            trends.add(new FinancialSummaryDto.MonthlyTrendPoint(
+                    historicalYm.format(DateTimeFormatter.ofPattern("MMM yyyy")),
+                    hTotRev,
+                    hMotherIsp,
+                    hOtherExp,
+                    hTotExp,
+                    hNetProfit
+            ));
+        }
+        dto.setMonthlyTrends(trends);
+
         return dto;
     }
 }

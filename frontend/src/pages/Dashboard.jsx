@@ -57,19 +57,24 @@ export default function Dashboard({ onNavigate }) {
     loadDashboardData();
   }, [selectedMonth, activeWorkspaceId]);
 
-  const monthOptions = [
-    { value: '2026-10', label: 'October 2026' },
-    { value: '2026-09', label: 'September 2026' },
-    { value: '2026-08', label: 'August 2026' },
-    { value: '2026-07', label: 'July 2026' },
-    { value: '2026-06', label: 'June 2026' },
-  ];
+  const monthOptions = React.useMemo(() => {
+    const list = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      list.push({ value: val, label });
+    }
+    return list;
+  }, []);
 
   // Financial metrics
   const totalRev = Number(finance?.totalRevenue || 0);
   const directRev = Number(finance?.directPackageCollections || 0);
   const portalRev = Number(finance?.portalPackageCollections || 0);
   const eqRev = Number(finance?.equipmentSalesCollections || 0);
+  const collectedByMe = directRev + eqRev;
 
   const motherIspExp = Number(finance?.motherIspPayoutExpense || 0);
   const eqExp = Number(finance?.equipmentPurchaseExpense || 0);
@@ -209,7 +214,7 @@ export default function Dashboard({ onNavigate }) {
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                   <span>Collected by Me:</span>
                 </span>
-                <strong className="text-blue-600 dark:text-blue-400 font-bold text-[11px]">৳{directRev.toFixed(2)}</strong>
+                <strong className="text-blue-600 dark:text-blue-400 font-bold text-[11px]">৳{collectedByMe.toFixed(2)}</strong>
               </div>
             </div>
           </div>

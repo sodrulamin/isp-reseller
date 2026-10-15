@@ -18,6 +18,7 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Long> {
     Optional<Subscriber> findByResellerIdAndSubscriberCode(Long resellerId, String subscriberCode);
     long countByResellerId(Long resellerId);
     long countByResellerIdAndStatus(Long resellerId, SubscriberStatus status);
+    long countByStatus(SubscriberStatus status);
 
     // Find subscribers whose billing renewal is due
     @Query("SELECT s FROM Subscriber s WHERE s.status = 'ACTIVE' AND s.nextBillingDate <= :date")

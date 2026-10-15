@@ -22,4 +22,10 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     // Sum revenue received from subscribers for equipment
     @Query("SELECT COALESCE(SUM(e.customerPaidAmount), 0) FROM Equipment e WHERE e.reseller.id = :resellerId AND e.purchaseDate BETWEEN :start AND :end")
     BigDecimal sumCustomerPaidAmountByResellerAndDateRange(@Param("resellerId") Long resellerId, @Param("start") LocalDate start, @Param("end") LocalDate end);
+
+    @Query("SELECT COALESCE(SUM(e.purchaseCost), 0) FROM Equipment e WHERE e.purchaseDate BETWEEN :start AND :end")
+    BigDecimal sumTotalPurchaseCostByDateRange(@Param("start") LocalDate start, @Param("end") LocalDate end);
+
+    @Query("SELECT COALESCE(SUM(e.customerPaidAmount), 0) FROM Equipment e WHERE e.purchaseDate BETWEEN :start AND :end")
+    BigDecimal sumTotalCustomerPaidAmountByDateRange(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }
